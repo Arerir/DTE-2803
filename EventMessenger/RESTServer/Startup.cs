@@ -31,6 +31,7 @@ namespace RESTServer
             services.AddDbContext<EventDBContext>(options => {
                 options.UseSqlServer(Configuration.GetConnectionString("EventDBConnection"));
             });
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -40,6 +41,9 @@ namespace RESTServer
             {
                 app.UseDeveloperExceptionPage();
             }
+            app.UseCors(builder => builder.AllowAnyOrigin()
+                                            .AllowAnyHeader()
+                                            .AllowAnyMethod());
 
             app.UseHttpsRedirection();
 

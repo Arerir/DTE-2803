@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -52,18 +56,19 @@ namespace RESTServer.Controllers
             return UserDTO.Selector().Compile()(user);
         }
 
-        [HttpGet("authenticate/")]
-
         // PUT: api/Users/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, User user)
+        public async Task<IActionResult> PutUser(int id, UserDTO user)
         {
             if (id != user.Id)
             {
                 return BadRequest();
             }
+
+
+
 
             _context.Entry(user).State = EntityState.Modified;
 
@@ -98,6 +103,44 @@ namespace RESTServer.Controllers
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
+        [HttpPost("authenticate")]
+        public ActionResult PostAuthenticate ([FromBody] LoginDTO credentials)
+        {
+            var user = new StringBuilder(128);
+            using (SHA512 shaM = new SHA512Managed())
+            {
+                var userBytes = Encoding.UTF8.GetBytes(credentials.UserId);
+                shaM.ComputeHash(userBytes);
+                foreach (var b in shaM.Hash)
+                    user.Append(b.ToString("X2"));
+            }
+
+            var pass = new StringBuilder(128);
+            using (SHA512 shaM = new SHA512Managed())
+            {
+                var passBytes = Encoding.UTF8.GetBytes(credentials.Password);
+                shaM.ComputeHash(passBytes);
+                foreach (var b in shaM.Hash)
+                    pass.Append(b.ToString("X2"));
+            }
+
+            var result = _context.Users.Any(x => x.Password == pass.ToString() && x.BirthId == user.ToString() && !x.IsDeleted);
+
+            if(result)
+            {
+
+            }
+
+            return Ok(result);
+        }
+
+        private JwtSecurityToken GenerateToken(User user) 
+        {
+            var token = new JwtSecurityToken();
+
+            return token;
+        }
+
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
         public async Task<ActionResult<User>> DeleteUser(int id)
@@ -108,7 +151,8 @@ namespace RESTServer.Controllers
                 return NotFound();
             }
 
-            _context.Users.Remove(user);
+            user.IsDeleted = true;
+
             await _context.SaveChangesAsync();
 
             return user;

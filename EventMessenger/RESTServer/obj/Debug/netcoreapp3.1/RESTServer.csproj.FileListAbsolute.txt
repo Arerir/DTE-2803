@@ -1,0 +1,10 @@
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\appsettings.Development.json
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\appsettings.json
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\Properties\launchSettings.json
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\RESTServer.exe
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.csprojAssemblyReference.cache
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.AssemblyInfoInputs.cache
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.AssemblyInfo.cs
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.RazorTargetAssemblyInfo.cache
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\staticwebassets\RESTServer.StaticWebAssets.Manifest.cache
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\staticwebassets\RESTServer.StaticWebAssets.xml

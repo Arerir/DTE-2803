@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using RESTServer.Entities;
 using RESTServer.Models;
 using System;
@@ -10,6 +11,7 @@ namespace RESTServer.Data
 {
     public class EventDBContext : DbContext
     {
+
         public EventDBContext (DbContextOptions<EventDBContext> options)
             : base(options)
         {

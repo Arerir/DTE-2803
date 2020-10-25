@@ -11,10 +11,17 @@ namespace RESTServer.Models
     public class Reminder
     {
         [Key]
-        public string Id { get; set; }
-        [ForeignKey("BadEvent")]
-        public string EventId { get; set; }
+        public int Id { get; set; }
+        public int EventId { get; set; }
+        public BadEvent Event { get; set; }
         public DateTime Date { get; set; }
         public string Message { get; set; }
+        public bool IsDeleted { get; set; }
+        public DateTime Created { get; set; }
+        public int CreatedById { get; set; }
+        public User CreatedBy { get; set; }
+        public DateTime? Modified { get; set; }
+        public int? ModifiedById { get; set; }
+        public User? ModifiedBy { get; set; }
     }
 }

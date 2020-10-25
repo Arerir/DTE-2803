@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RESTServer.Data;
+using RESTServer.Data.DTO;
 using RESTServer.Entities;
 
 namespace RESTServer.Controllers
@@ -23,14 +24,23 @@ namespace RESTServer.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            var list = await _context.Users.ToListAsync();
+            var dtoList = new List<UserDTO>();
+
+            foreach (var user in list)
+            {
+                var dto = UserDTO.Selector().Compile()(user);
+                dtoList.Add(dto);
+            }
+
+            return dtoList;
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserDTO>> GetUser(int id)
         {
             var user = await _context.Users.FindAsync(id);
 
@@ -39,8 +49,10 @@ namespace RESTServer.Controllers
                 return NotFound();
             }
 
-            return user;
+            return UserDTO.Selector().Compile()(user);
         }
+
+        [HttpGet("authenticate/")]
 
         // PUT: api/Users/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RESTServer.Data;
+using RESTServer.Data.DTO;
 using RESTServer.Models;
 
 namespace RESTServer.Controllers
@@ -23,14 +24,23 @@ namespace RESTServer.Controllers
 
         // GET: api/Reminders
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Reminder>>> GetReminders()
+        public async Task<ActionResult<IEnumerable<ReminderDTO>>> GetReminders()
         {
-            return await _context.Reminders.ToListAsync();
+            var list = await _context.Reminders.Where(x => !x.IsDeleted).Include(x => x.CreatedBy).ToListAsync();
+            var dtoList = new List<ReminderDTO>();
+
+            foreach (var reminder in list)
+            {
+                var dto = ReminderDTO.Selector().Compile()(reminder);
+                dtoList.Add(dto);
+            }
+
+            return dtoList;
         }
 
         // GET: api/Reminders/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Reminder>> GetReminder(int id)
+        public async Task<ActionResult<ReminderDTO>> GetReminder(int id)
         {
             var reminder = await _context.Reminders.FindAsync(id);
 
@@ -39,7 +49,9 @@ namespace RESTServer.Controllers
                 return NotFound();
             }
 
-            return reminder;
+            var dto = ReminderDTO.Selector().Compile()(reminder);
+
+            return dto;
         }
 
         // PUT: api/Reminders/5

@@ -126,11 +126,6 @@ namespace RESTServer.Controllers
 
             var result = _context.Users.Any(x => x.Password == pass.ToString() && x.BirthId == user.ToString() && !x.IsDeleted);
 
-            if(result)
-            {
-
-            }
-
             return Ok(result);
         }
 

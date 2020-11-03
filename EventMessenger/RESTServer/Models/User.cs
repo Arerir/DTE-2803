@@ -23,5 +23,6 @@ namespace RESTServer.Entities
         public DateTime? Modified { get; set; }
         public int? ModifiedById { get; set; }
         public User? ModifiedBy { get; set; }
+        public bool Active { get; set; } // not in DB
     }
 }

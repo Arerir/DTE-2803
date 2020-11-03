@@ -13,6 +13,7 @@ namespace RESTServer.Data.DTO
         public string Email { get; set; }
         public string FirstName { get; set; }
         public string SirName { get; set; }
+        public bool Active { get; set; } // not in DB
 
         public static Expression<Func<User, UserDTO>> Selector()
         {

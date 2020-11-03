@@ -31,6 +31,7 @@ import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,17 +40,23 @@ public class MainActivity extends AppCompatActivity {
     }
     public void onClickBtn(View v)
     {
+        Intent intent = new Intent(MainActivity.this, NavigationEvents.class);
+        startActivity(intent);
+
         Map<String, String> comment = new HashMap<String, String>();
+//        comment.put("subject", "Using the GSON library");
+//        comment.put("message", "Using libraries is convenient.");
         String json = new GsonBuilder().create().toJson(comment, Map.class);
+//        makeRequest("http://192.168.0.1:3000/post/77/comments", json);
     }
 
-    public static HttpResponse makeRequest(String uri, String json) { // funksjon for a jobbe med foresporsel til server
+    public static HttpResponse makeRequest(String uri, String json) {
         try {
-            HttpPost httpPost = new HttpPost(uri); // sett URL
-            httpPost.setEntity(new StringEntity(json)); // add data
+            HttpPost httpPost = new HttpPost(uri);
+            httpPost.setEntity(new StringEntity(json));
             httpPost.setHeader("Accept", "application/json");
-            httpPost.setHeader("Content-type", "application/json");//angi sendetype data
-            return new DefaultHttpClient().execute(httpPost); // utfore data til server
+            httpPost.setHeader("Content-type", "application/json");
+            return new DefaultHttpClient().execute(httpPost);
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         } catch (ClientProtocolException e) {

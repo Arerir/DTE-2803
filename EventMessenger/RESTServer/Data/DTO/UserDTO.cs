@@ -10,10 +10,13 @@ namespace RESTServer.Data.DTO
     public class UserDTO
     {
         public int Id { get; set; }
+        public string BirthId { get; set; }
+        public string Password { get; set; }
         public string Email { get; set; }
         public string FirstName { get; set; }
         public string SirName { get; set; }
-        public bool Active { get; set; } // not in DB
+        public bool HasAdmin { get; set; }
+        public bool Active { get; set; }
 
         public static Expression<Func<User, UserDTO>> Selector()
         {
@@ -22,7 +25,8 @@ namespace RESTServer.Data.DTO
                 Id = x.Id,
                 Email = x.Email,
                 FirstName = x.FirstName,
-                SirName = x.SirName
+                SirName = x.SirName,
+                HasAdmin = x.HasAdmin
             };
         }
     }

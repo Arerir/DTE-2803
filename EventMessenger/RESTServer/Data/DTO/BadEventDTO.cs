@@ -9,7 +9,7 @@ namespace RESTServer.Data.DTO
     {
         public int Id { get; set; }
         public string Message { get; set; }
-        public string Reason { get; set; } // not in DB
+        public string Reason { get; set; }
         public string Placement { get; set; }
         public DateTime Date { get; set; }
         public int SeverityId { get; set; }

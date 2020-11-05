@@ -28,6 +28,6 @@ namespace RESTServer.Entities
         public int? ModifiedById { get; set; }
         public User? ModifiedBy { get; set; }
         public string Reason { get; set; } // not in DB
-
+        public bool Archived { get; set; } // not in DB
     }
 }

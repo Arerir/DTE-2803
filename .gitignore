@@ -20,3 +20,5 @@ EventMessenger/RESTServer/bin/Release/netcoreapp3.1/appsettings.Development.json
 EventMessenger/RESTServer/obj/Release/netcoreapp3.1/PubTmp/Out/appsettings.json
 
 EventMessenger/RESTServer/Properties/PublishProfiles/IISProfile.pubxml
+
+*.cache

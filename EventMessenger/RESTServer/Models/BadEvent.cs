@@ -27,7 +27,7 @@ namespace RESTServer.Entities
         public DateTime? Modified { get; set; }
         public int? ModifiedById { get; set; }
         public User? ModifiedBy { get; set; }
-        public string Reason { get; set; } // not in DB
-
+        public string Reason { get; set; }
+        public bool Archived { get; set; }
     }
 }

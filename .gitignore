@@ -6,3 +6,19 @@ EventMessenger/RESTServer/appsettings.json
 EventMessenger/RESTServer/bin/Debug/netcoreapp3.1/appsettings.Development.json
 
 EventMessenger/RESTServer/bin/Debug/netcoreapp3.1/appsettings.json
+
+EventMessenger/.vs/EventMessenger/DesignTimeBuild/.dtbcache.v2
+
+EventMessenger/.vs/EventMessenger/v16/.suo
+
+EventMessenger/RESTServer/bin/Release/netcoreapp3.1/appsettings.json
+
+EventMessenger/RESTServer/obj/Release/netcoreapp3.1/PubTmp/Out/appsettings.Development.json
+
+EventMessenger/RESTServer/bin/Release/netcoreapp3.1/appsettings.Development.json
+
+EventMessenger/RESTServer/obj/Release/netcoreapp3.1/PubTmp/Out/appsettings.json
+
+EventMessenger/RESTServer/Properties/PublishProfiles/IISProfile.pubxml
+
+*.cache

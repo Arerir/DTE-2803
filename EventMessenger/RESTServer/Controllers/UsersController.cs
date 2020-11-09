@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using RESTServer.Data;
 using RESTServer.Data.DTO;
 using RESTServer.Entities;
@@ -62,15 +63,27 @@ namespace RESTServer.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutUser(int id, UserDTO user)
         {
+            //if current user is Admin
             if (id != user.Id)
             {
                 return BadRequest();
             }
 
+            if (!UserExists(id))
+            {
+                return NotFound();
+            }
 
+            var dbObject = _context.Users.FirstOrDefault(x => x.Id == id);
 
+            dbObject.FirstName = user.FirstName;
+            dbObject.SirName = user.SirName;
+            dbObject.Password = !string.IsNullOrEmpty(user.Password) ? GetHashedValue(user.Password) : dbObject.Password;
+            dbObject.BirthId = !string.IsNullOrEmpty(user.Password) ? GetHashedValue(user.BirthId): dbObject.BirthId;
+            dbObject.Email = user.Email;
+            dbObject.HasAdmin = user.HasAdmin;
 
-            _context.Entry(user).State = EntityState.Modified;
+            _context.Entry(dbObject).State = EntityState.Modified;
 
             try
             {
@@ -78,14 +91,6 @@ namespace RESTServer.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!UserExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
             }
 
             return NoContent();
@@ -95,51 +100,63 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user)
         {
-            _context.Users.Add(user);
+            //if user logged in is authenticated
+
+            var dbObject = new User()
+            {
+                Active = false,
+                AmountOfLogins = 0,
+                BirthId = GetHashedValue(user.BirthId),
+                Email = user.Email,
+                FirstName = user.FirstName,
+                HasAdmin = user.HasAdmin,
+                IsDeleted = false,
+                Password = GetHashedValue(user.Password),
+                SirName = user.SirName
+            };
+
+
+            _context.Users.Add(dbObject);
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetUser", new { id = user.Id }, user);
         }
 
+        private string GetHashedValue (string input)
+        {
+            var builder = new StringBuilder(128);
+            using(SHA512 shaM = new SHA512Managed())
+            {
+                var bytes = Encoding.UTF8.GetBytes(input);
+                shaM.ComputeHash(bytes);
+
+                foreach(var b in shaM.Hash)
+                {
+                    builder.Append(b.ToString("X2"));
+                }
+            }
+            return builder.ToString();
+        }
+
         [HttpPost("authenticate")]
         public ActionResult PostAuthenticate ([FromBody] LoginDTO credentials)
         {
-            var user = new StringBuilder(128);
-            using (SHA512 shaM = new SHA512Managed())
-            {
-                var userBytes = Encoding.UTF8.GetBytes(credentials.UserId);
-                shaM.ComputeHash(userBytes);
-                foreach (var b in shaM.Hash)
-                    user.Append(b.ToString("X2"));
-            }
+            var user = GetHashedValue(credentials.UserId);
+            var pass = GetHashedValue(credentials.Password);
 
-            var pass = new StringBuilder(128);
-            using (SHA512 shaM = new SHA512Managed())
-            {
-                var passBytes = Encoding.UTF8.GetBytes(credentials.Password);
-                shaM.ComputeHash(passBytes);
-                foreach (var b in shaM.Hash)
-                    pass.Append(b.ToString("X2"));
-            }
-
-            var result = _context.Users.Any(x => x.Password == pass.ToString() && x.BirthId == user.ToString() && !x.IsDeleted);
+            var result = _context.Users.Any(x => x.Password == pass && x.BirthId == user && !x.IsDeleted);
 
             return Ok(result);
         }
 
-        private JwtSecurityToken GenerateToken(User user) 
-        {
-            var token = new JwtSecurityToken();
-
-            return token;
-        }
-
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<User>> DeleteUser(int id)
+        public async Task<ActionResult<bool>> DeleteUser(int id)
         {
+            // if user is Authenticated and id != currentUser.Id
+
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
@@ -150,7 +167,7 @@ namespace RESTServer.Controllers
 
             await _context.SaveChangesAsync();
 
-            return user;
+            return true;
         }
 
         private bool UserExists(int id)

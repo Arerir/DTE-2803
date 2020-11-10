@@ -40,9 +40,18 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
@@ -59,6 +68,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final Properties props = System.getProperties();
+
         props.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
     }
     public void onClickBtn(View v)
@@ -84,7 +94,6 @@ public class MainActivity extends AppCompatActivity {
             public void run() {
                 Looper.prepare(); //For Preparing Message Pool for the child Thread
                 OkHttpClient client = new OkHttpClient();
-
 
 
                 
@@ -131,7 +140,8 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                System.out.println(response.body().toString());
+                if(response != null) System.out.println(response.body().toString());
+
 //                } catch(Exception e) {
 //                    e.printStackTrace();
 //                    System.out.println(e);

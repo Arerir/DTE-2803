@@ -12,41 +12,52 @@ import java.util.List;
 
 class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
 
-    private LayoutInflater inflater;
-    private List<Events> event;
+    private Context context;
+    private List<BadEvent> events;
 
-    DataAdapter(Context context, List<Events> event) {
-        this.event = event;
-        this.inflater = LayoutInflater.from(context);
+    DataAdapter(Context context, List<BadEvent> events) {
+        this.events = events;
+        this.context = context;
     }
     @Override
     public DataAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        return new DataAdapter.ViewHolder(LayoutInflater.from(parent.getContext()).inflate(R.layout.list_item, parent, false));
+    }
 
-        View view = inflater.inflate(R.layout.list_item, parent, false);
-        return new ViewHolder(view);
+    public void setEvents(List<BadEvent> events) {
+        this.events = events;
+        notifyDataSetChanged();
+    }
+
+    public void addItem(BadEvent event) {
+        this.events.add(event);
+        notifyItemInserted(this.events.size() - 1);
     }
 
     @Override
     public void onBindViewHolder(DataAdapter.ViewHolder holder, int position) {
-        Events events = event.get(position);
-        holder.nameView.setText(events.getName());
-        holder.timeView.setText(events.getTime());
-        holder.alvorlighetsgradView.setText(events.getAlvorlighetsgrad());
-
+        holder.onBind(position);
     }
 
     @Override
     public int getItemCount() {
-        return event.size();
+        return events.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        final TextView nameView, timeView, alvorlighetsgradView;
+        TextView nameView, timeView, alvorlighetsgradView;
         ViewHolder(View view){
             super(view);
             nameView = (TextView) view.findViewById(R.id.name);
             timeView = (TextView) view.findViewById(R.id.time);
             alvorlighetsgradView = (TextView) view.findViewById(R.id.alvorlighetsgrad);
+        }
+
+        void onBind(int position) {
+            final BadEvent badEvent = events.get(position);
+            nameView.setText(String.valueOf(badEvent.getMessage()));
+            timeView.setText(String.valueOf(badEvent.getDate()));
+            alvorlighetsgradView.setText(String.valueOf(badEvent.getSeverityId()));
         }
     }
 }

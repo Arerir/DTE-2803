@@ -33,6 +33,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.protocol.HTTP;
 import org.apache.http.util.EntityUtils;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -40,10 +41,20 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.security.cert.CertificateException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+
+import okhttp3.FormBody;
+import okhttp3.MediaType;
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -69,34 +80,42 @@ public class MainActivity extends AppCompatActivity {
         Map<String, String> login = new HashMap<String, String>();
         login.put("userId", txt1.getText().toString());
         login.put("password", txt2.getText().toString());
-        String s = makeRequest("https://danieleli2.asuscomm.com/api/users/authenticate", login);
+        Boolean s = makeRequest("https://danieleli2.asuscomm.com/api/users/authenticate", login);
 //        JsonObject convertedObject = new Gson().fromJson(s, JsonObject.class);
 //
 //        System.out.println(convertedObject.toString());
-        Intent intent = new Intent(MainActivity.this, NavigationEvents.class);
-        startActivity(intent);
+        if(s == true) {
+            Intent intent = new Intent(MainActivity.this, NavigationEvents.class);
+            startActivity(intent);
+        }
     }
 
-    public static String makeRequest(final String uri, final Map<String, String> obj) {
+    public static Boolean makeRequest(final String uri, final Map<String, String> obj) {
         final String[] value = new String[1];
         Thread t = new Thread() {
 
             public void run() {
                 Looper.prepare(); //For Preparing Message Pool for the child Thread
-                OkHttpClient client = new OkHttpClient();
+                OkHttpClient client = getUnsafeOkHttpClient();
+
+                MediaType mediaType = MediaType.parse("application/json");
 
 
 
-                
-                RequestBody requestBody = new MultipartBody.Builder()
-                        .setType(MultipartBody.FORM)
-                        .addFormDataPart("userId", obj.get("userId"))
-                        .addFormDataPart("password", obj.get("password"))
-                        .build();
+                JSONObject json = new JSONObject();
 
+                for (String i : obj.keySet()) {
+                    try {
+                        json.put(i, obj.get(i));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+                RequestBody requestBody = RequestBody.create(mediaType, String.valueOf(json));
                 Request request = new Request.Builder()
                         .url(uri)
                         .post(requestBody)
+                        .addHeader("Content-Type", "application/json")
                         .build();
 
 
@@ -131,7 +150,12 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                System.out.println(response.body().toString());
+                try {
+
+                    value[0] = response.body().string();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 //                } catch(Exception e) {
 //                    e.printStackTrace();
 //                    System.out.println(e);
@@ -148,9 +172,51 @@ public class MainActivity extends AppCompatActivity {
         } catch(InterruptedException e) {
             System.out.println("got interrupted!");
         }
-        return value[0];
+        return Boolean.parseBoolean(value[0]);
     }
 
+
+    private static OkHttpClient getUnsafeOkHttpClient() {
+        try {
+            // Create a trust manager that does not validate certificate chains
+            final TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new java.security.cert.X509Certificate[]{};
+                        }
+                    }
+            };
+
+            // Install the all-trusting trust manager
+            final SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            // Create an ssl socket factory with our all-trusting manager
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
+            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
+            builder.hostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
+
+            OkHttpClient okHttpClient = builder.build();
+            return okHttpClient;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
 //    public static String makeRequest(final String uri) {
 //        final String[] value = new String[1];

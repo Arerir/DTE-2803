@@ -47,21 +47,14 @@ import java.util.Map;
 import java.util.Properties;
 
 import javax.net.ssl.HostnameVerifier;
-<<<<<<< HEAD
-=======
-import javax.net.ssl.HttpsURLConnection;
->>>>>>> da8d0df098ad30c5bd6957a644c6462dd315ca8a
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
 import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 
-<<<<<<< HEAD
 import okhttp3.FormBody;
 import okhttp3.MediaType;
-=======
->>>>>>> da8d0df098ad30c5bd6957a644c6462dd315ca8a
 import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -77,7 +70,6 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         final Properties props = System.getProperties();
-
         props.setProperty("jdk.internal.httpclient.disableHostnameVerification", Boolean.TRUE.toString());
     }
     public void onClickBtn(View v)
@@ -108,16 +100,7 @@ public class MainActivity extends AppCompatActivity {
 
                 MediaType mediaType = MediaType.parse("application/json");
 
-<<<<<<< HEAD
 
-=======
-                
-                RequestBody requestBody = new MultipartBody.Builder()
-                        .setType(MultipartBody.FORM)
-                        .addFormDataPart("userId", obj.get("userId"))
-                        .addFormDataPart("password", obj.get("password"))
-                        .build();
->>>>>>> da8d0df098ad30c5bd6957a644c6462dd315ca8a
 
                 JSONObject json = new JSONObject();
 
@@ -167,17 +150,12 @@ public class MainActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-<<<<<<< HEAD
                 try {
 
                     value[0] = response.body().string();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-=======
-                if(response != null) System.out.println(response.body().toString());
-
->>>>>>> da8d0df098ad30c5bd6957a644c6462dd315ca8a
 //                } catch(Exception e) {
 //                    e.printStackTrace();
 //                    System.out.println(e);

@@ -17,6 +17,7 @@ namespace RESTServer
 {
     public class Startup
     {
+        readonly string defaultPolicy = "defaultPolicy";
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -31,7 +32,15 @@ namespace RESTServer
             services.AddDbContext<EventDBContext>(options => {
                 options.UseSqlServer(Configuration.GetConnectionString("EventDBConnection"));
             });
-            services.AddCors();
+            services.AddCors( options =>
+            {
+                options.AddPolicy(name: defaultPolicy, builder =>
+                {
+                        builder.AllowAnyOrigin()
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                });
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -41,9 +50,9 @@ namespace RESTServer
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseCors(builder => builder.AllowAnyOrigin()
-                                            .AllowAnyHeader()
-                                            .AllowAnyMethod());
+            app.UseCors(defaultPolicy);
+
+            app.UseOptions();
 
             app.UseHttpsRedirection();
 

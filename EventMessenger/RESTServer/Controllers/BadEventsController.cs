@@ -30,7 +30,26 @@ namespace RESTServer.Controllers
 
             //limit list by user.HasAdmin ? All : .Where(x => x.CreatedBy == user.Id)
 
-            var list = await _context.Events.ToListAsync();
+            var list = await _context.Events.Where(x => !x.IsDeleted && !x.Archived).ToListAsync();
+
+            var dtoList = new List<BadEventDTO>();
+
+            foreach (var item in list)
+            {
+                dtoList.Add(BadEventDTO.Selector().Compile()(item));
+            }
+
+            return dtoList;
+        }
+        // GET: api/BadEvents/archive
+        [HttpGet("archive")]
+        public async Task<ActionResult<IEnumerable<BadEventDTO>>> GetArchive()
+        {
+            // if user is authenticated
+
+            //limit list by user.HasAdmin ? All : .Where(x => x.CreatedBy == user.Id)
+
+            var list = await _context.Events.Where(x => !x.IsDeleted && x.Archived).ToListAsync();
 
             var dtoList = new List<BadEventDTO>();
 
@@ -50,7 +69,7 @@ namespace RESTServer.Controllers
 
             var badEvent = await _context.Events.FindAsync(id);
 
-            if (badEvent == null)
+            if (badEvent == null && !badEvent.IsDeleted)
             {
                 return NotFound();
             }
@@ -69,13 +88,12 @@ namespace RESTServer.Controllers
             {
                 return BadRequest();
             }
-
-            var badEvent = _context.Events.FirstOrDefault(x => x.Id == id);
-
-            if(badEvent == null)
+            if (!BadEventExists(id))
             {
                 return NotFound();
             }
+
+            var badEvent = _context.Events.First(x => x.Id == id && !x.IsDeleted && !x.Archived);
 
             badEvent.Date = dto.Date;
             badEvent.Message = dto.Message;
@@ -84,27 +102,19 @@ namespace RESTServer.Controllers
             badEvent.SeverityId = dto.SeverityId;
             badEvent.StatusId = dto.StatusId;
             badEvent.Modified = DateTime.Now;
-            //badEvent.ModifiedBy = user.Id;
+            badEvent.ModifiedById = 1; //Exchange for current user
 
             _context.Entry(badEvent).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BadEventExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
-            return NoContent();
         }
 
         [HttpPut("archive/{id}")]
@@ -115,33 +125,25 @@ namespace RESTServer.Controllers
             {
                 return BadRequest();
             }
-
-            var badEvent = _context.Events.FirstOrDefault(x => x.Id == id);
-
-            if (badEvent == null)
+            if (!BadEventExists(id))
             {
                 return NotFound();
             }
+
+            var badEvent = _context.Events.First(x => x.Id == id);
+
 
             badEvent.Archived = true;
 
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!BadEventExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
-            return NoContent();
         }
 
         // POST: api/BadEvents
@@ -150,10 +152,11 @@ namespace RESTServer.Controllers
         [HttpPost]
         public async Task<ActionResult<BadEventDTO>> PostBadEvent(BadEventDTO dto)
         {
-
+            //Exchange CreatedByID for current user
             var badEvent = new BadEvent()
             {
                 Created = DateTime.Now,
+                CreatedById = 1,
                 Date = dto.Date,
                 IsDeleted = false,
                 Message = dto.Message,
@@ -166,7 +169,7 @@ namespace RESTServer.Controllers
             _context.Events.Add(badEvent);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetBadEvent", new { id = badEvent.Id }, badEvent);
+            return CreatedAtAction("GetBadEvent", new { id = badEvent.Id }, BadEventDTO.Selector().Compile()(badEvent));
         }
 
         // DELETE: api/BadEvents/5

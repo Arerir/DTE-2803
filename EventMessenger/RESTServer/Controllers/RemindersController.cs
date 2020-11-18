@@ -58,60 +58,74 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutReminder(int id, Reminder reminder)
+        public async Task<IActionResult> PutReminder(int id, [FromBody]ReminderDTO reminder)
         {
             if (id != reminder.Id)
             {
                 return BadRequest();
             }
+            if (!ReminderExists(id))
+            {
+                return NotFound();
+            }
 
-            _context.Entry(reminder).State = EntityState.Modified;
+            var dbObject = _context.Reminders.First(x => x.Id == id);
+
+            dbObject.EventId = reminder.EventId;
+            dbObject.Date = reminder.EventDate;
+            dbObject.Message = reminder.Message;
+            dbObject.Modified = DateTime.Now;
+            dbObject.ModifiedById = 1; //Exchange for current user
+            _context.Entry(dbObject).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ReminderExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
-            return NoContent();
         }
 
         // POST: api/Reminders
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<Reminder>> PostReminder(Reminder reminder)
+        public async Task<ActionResult<ReminderDTO>> PostReminder([FromBody]ReminderDTO dto)
         {
+            //Exchange CreatedByID for current user
+            var reminder = new Reminder()
+            {
+                Created = DateTime.Now,
+                CreatedById = 1,
+                Date = dto.EventDate,
+                EventId = dto.EventId,
+                Message = dto.Message
+            };
+
             _context.Reminders.Add(reminder);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetReminder", new { id = reminder.Id }, reminder);
+            return CreatedAtAction("GetReminder", new { id = reminder.Id }, ReminderDTO.Selector().Compile()(reminder));
         }
 
         // DELETE: api/Reminders/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<Reminder>> DeleteReminder(int id)
+        public async Task<ActionResult<bool>> DeleteReminder(int id)
         {
+            //Only run if user is authenticated
             var reminder = await _context.Reminders.FindAsync(id);
             if (reminder == null)
             {
                 return NotFound();
             }
 
-            _context.Reminders.Remove(reminder);
+            reminder.IsDeleted = true;
             await _context.SaveChangesAsync();
 
-            return reminder;
+            return true;
         }
 
         private bool ReminderExists(int id)

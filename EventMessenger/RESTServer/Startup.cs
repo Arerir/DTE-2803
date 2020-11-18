@@ -50,15 +50,13 @@ namespace RESTServer
             {
                 app.UseDeveloperExceptionPage();
             }
-            app.UseCors(defaultPolicy);
+            //app.UseOptions();
 
-            app.UseOptions();
+            app.UseCors(defaultPolicy);            
 
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

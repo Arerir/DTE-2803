@@ -104,7 +104,7 @@ namespace RESTServer.Controllers
         {
             //if user logged in is authenticated
 
-            if (_context.Users.Any())
+            if (_context.Users.Any(x => x.Email.Equals(user.Email)))
                 return BadRequest();
 
             var dbObject = new User()

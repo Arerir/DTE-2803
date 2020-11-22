@@ -152,3 +152,4 @@ G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreap
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.csproj.CoreCompileInputs.cache
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.MvcApplicationPartsAssemblyInfo.cache
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.csprojAssemblyReference.cache
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\web.config

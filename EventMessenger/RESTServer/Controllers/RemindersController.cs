@@ -51,6 +51,10 @@ namespace RESTServer.Controllers
 
             var dto = ReminderDTO.Selector().Compile()(reminder);
 
+            var user = await _context.Users.FindAsync(reminder.CreatedById);
+
+            dto.SendtFrom = user.FirstName + " " + user.SirName;
+
             return dto;
         }
 

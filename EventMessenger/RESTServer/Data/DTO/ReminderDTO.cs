@@ -24,8 +24,7 @@ namespace RESTServer.Data.DTO
                 EventId = x.EventId,
                 EventDate = x.Date,
                 Message = x.Message,
-                ReminderDate = x.Created,
-                SendtFrom = x.CreatedBy.FirstName + x.CreatedBy.SirName
+                ReminderDate = x.Created
             };
         }
     }

@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Cassandra;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using RESTServer.Data;
 using RESTServer.Data.DTO;
 using RESTServer.Entities;
+using RESTServer.Models;
 
 namespace RESTServer.Controllers
 {

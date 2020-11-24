@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using RESTServer.Data;
+using RESTServer.Data.DAO;
 using RESTServer.Data.DTO;
 using RESTServer.Entities;
 
@@ -31,11 +32,16 @@ namespace RESTServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
-            var list = await _context.Users.Where(x => !x.IsDeleted).ToListAsync();
+            var dao = new UserDAO();
+
+            var list = dao.GetUsers();
+            //var list = await _context.Users.Where(x => !x.IsDeleted).ToListAsync(); use to add users from earlier solution
+
             var dtoList = new List<UserDTO>();
 
             foreach (var user in list)
             {
+                //dao.CreateUser(user);use to add users from earlier solution
                 var dto = UserDTO.Selector().Compile()(user);
                 dtoList.Add(dto);
             }
@@ -45,9 +51,11 @@ namespace RESTServer.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<UserDTO>> GetUser(int id)
+        public ActionResult<UserDTO> GetUser(int id)
         {
-            var user = await _context.Users.FindAsync(id);
+            var dao = new UserDAO();
+
+            var user = dao.GetUser(id);
 
             if (user == null || user.IsDeleted)
             {
@@ -61,20 +69,23 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, [FromBody]UserDTO user)
+        public IActionResult PutUser(int id, [FromBody]UserDTO user)
         {
             //if current user is Admin
+
+            var dao = new UserDAO();
+
             if (id != user.Id)
             {
                 return BadRequest();
             }
 
-            if (!UserExists(id))
+            var dbObject = dao.GetUser(id);
+
+            if(dbObject == null)
             {
                 return NotFound();
             }
-
-            var dbObject = _context.Users.First(x => x.Id == id);
 
             dbObject.FirstName = user.FirstName;
             dbObject.SirName = user.SirName;
@@ -83,11 +94,9 @@ namespace RESTServer.Controllers
             dbObject.Email = user.Email;
             dbObject.HasAdmin = user.HasAdmin;
 
-            _context.Entry(dbObject).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                dao.UpdateUser(dbObject);
                 return Ok();
             }
             catch (DbUpdateConcurrencyException)
@@ -100,15 +109,18 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<UserDTO>> PostUser(UserDTO user)
+        public ActionResult<UserDTO> PostUser(UserDTO user)
         {
             //if user logged in is authenticated
 
-            if (_context.Users.Any(x => x.Email.Equals(user.Email)))
+            var dao = new UserDAO();
+
+            if (dao.UserExists(GetHashedValue(user.BirthId)))
                 return BadRequest();
 
             var dbObject = new User()
             {
+                Id = 0,
                 Active = false,
                 AmountOfLogins = 0,
                 BirthId = GetHashedValue(user.BirthId),
@@ -119,12 +131,9 @@ namespace RESTServer.Controllers
                 Password = GetHashedValue(user.Password),
                 SirName = user.SirName
             };
+            var id = dao.CreateUser(dbObject);
 
-
-            _context.Users.Add(dbObject);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetUser", new { id = user.Id }, UserDTO.Selector().Compile()(dbObject));
+            return CreatedAtAction("GetUser", new { id }, UserDTO.Selector().Compile()(dao.GetUser(id)));
         }
 
         private string GetHashedValue (string input)

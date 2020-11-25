@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.Spinner;
 
 import org.json.JSONException;
@@ -14,6 +16,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
@@ -48,13 +51,28 @@ public class RegisterEvents extends AppCompatActivity {
         ArrayAdapter<String> adapter1 = new ArrayAdapter<>(this, android.R.layout.simple_spinner_dropdown_item, items1);
         dropdown1.setAdapter(adapter1);
     }
-    public void onClickBtn1(View v)
-    {
+
+    public void onClickBtn1(View v) {
+        EditText message = (EditText) findViewById(R.id.arsak);
+        EditText reason = (EditText) findViewById(R.id.beskrivelse);
+        Spinner placement = (Spinner) findViewById(R.id.spinner2);
+        Spinner serverityId = (Spinner) findViewById(R.id.spinner1);
+        DatePicker date = (DatePicker) findViewById(R.id.dp_datepicker);
+
+        Map<String, Object> reg = new HashMap<String, Object>();
+        reg.put("message", message.getText().toString());
+        reg.put("reason", reason.getText().toString());
+        reg.put("placement", placement.getSelectedItem().toString());
+        reg.put("severityId", Integer.parseInt(serverityId.getSelectedItem().toString()));
+        reg.put("date", date.getYear()+"-"+(date.getMonth()+1)+"-"+date.getDayOfMonth());
+
+        System.out.println(reg);
+        String s = makeRequest("https://danieleli2.asuscomm.com/api/BadEvents/", reg);
         Intent intent = new Intent(RegisterEvents.this, NavigationEvents.class);
         startActivity(intent);
     }
 
-    public static String makeRequest(final String uri, final Map<String, String> obj) {
+    public static String makeRequest(final String uri, final Map<String, Object> obj) {
         final String[] value = new String[1];
         Thread t = new Thread() {
 
@@ -63,7 +81,6 @@ public class RegisterEvents extends AppCompatActivity {
                 OkHttpClient client = getUnsafeOkHttpClient();
 
                 MediaType mediaType = MediaType.parse("application/json");
-
 
 
                 JSONObject json = new JSONObject();
@@ -75,42 +92,26 @@ public class RegisterEvents extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-                RequestBody requestBody = RequestBody.create(mediaType, String.valueOf(json));
-                Request request = new Request.Builder()
-                        .url(uri)
-                        .post(requestBody)
-                        .addHeader("Content-Type", "application/json")
-                        .build();
+                System.out.println(json);
+                RequestBody requestBody = null;
+                Request request = null;
+                try {
+                    requestBody = RequestBody.create(mediaType, String.valueOf(json));
+                    request = new Request.Builder()
+                            .url(uri)
+                            .post(requestBody)
+                            .addHeader("Content-Type", "application/json")
+                            .build();
 
+                } catch (Exception e) {
+                    System.out.println(e);
+                }
 
-//                DefaultHttpClient client = new DefaultHttpClient();
-//                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-//                HttpResponse response;
-//                JSONObject json = new JSONObject();
-//
-//                try {
-//                    HttpPost post = new HttpPost(uri);
-//                    for (String i : obj.keySet()) {
-//                        json.put(i, obj.get(i));
-//                    }
-//
-//                    StringEntity se = new StringEntity(json.toString());
-//                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-//                    post.setEntity(se);
-//                    response = client.execute(post);
-//
-//                    HttpEntity entity = response.getEntity();
-//                    String responseString = EntityUtils.toString(entity, "UTF-8");
-//                Buffer buffer = new Buffer();
-//                try {
-//                    request.body().writeTo(buffer);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
 
                 Response response = null;
                 try {
                     response = client.newCall(request).execute();
+                    System.out.println(response);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -133,7 +134,7 @@ public class RegisterEvents extends AppCompatActivity {
         t.start();
         try {
             Thread.sleep(1500);
-        } catch(InterruptedException e) {
+        } catch (InterruptedException e) {
             System.out.println("got interrupted!");
         }
         return value[0];
@@ -143,7 +144,7 @@ public class RegisterEvents extends AppCompatActivity {
     private static OkHttpClient getUnsafeOkHttpClient() {
         try {
             // Create a trust manager that does not validate certificate chains
-            final TrustManager[] trustAllCerts = new TrustManager[] {
+            final TrustManager[] trustAllCerts = new TrustManager[]{
                     new X509TrustManager() {
                         @Override
                         public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
@@ -167,7 +168,7 @@ public class RegisterEvents extends AppCompatActivity {
             final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
 
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
+            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
             builder.hostnameVerifier(new HostnameVerifier() {
                 @Override
                 public boolean verify(String hostname, SSLSession session) {

@@ -111,38 +111,18 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-                RequestBody requestBody = RequestBody.create(mediaType, String.valueOf(json));
-                Request request = new Request.Builder()
-                        .url(uri)
-                        .post(requestBody)
-                        .addHeader("Content-Type", "application/json")
-                        .build();
+                RequestBody requestBody = null;
+                Request request = null;
+                try {
+                    requestBody = RequestBody.create(mediaType, String.valueOf(json));
+                    request = new Request.Builder()
+                            .url(uri)
+                            .post(requestBody)
+                            .addHeader("Content-Type", "application/json")
+                            .build();
 
+                } catch (Exception e ) { }
 
-//                DefaultHttpClient client = new DefaultHttpClient();
-//                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-//                HttpResponse response;
-//                JSONObject json = new JSONObject();
-//
-//                try {
-//                    HttpPost post = new HttpPost(uri);
-//                    for (String i : obj.keySet()) {
-//                        json.put(i, obj.get(i));
-//                    }
-//
-//                    StringEntity se = new StringEntity(json.toString());
-//                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-//                    post.setEntity(se);
-//                    response = client.execute(post);
-//
-//                    HttpEntity entity = response.getEntity();
-//                    String responseString = EntityUtils.toString(entity, "UTF-8");
-//                Buffer buffer = new Buffer();
-//                try {
-//                    request.body().writeTo(buffer);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
                 
                 Response response = null;
                 try {
@@ -218,40 +198,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    public static String makeRequest(final String uri) {
-//        final String[] value = new String[1];
-//        Thread t = new Thread() {
-//
-//            public void run() {
-//                Looper.prepare(); //For Preparing Message Pool for the child Thread
-//                HttpClient client = new DefaultHttpClient();
-//                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-//                HttpResponse response;
-//
-//                try {
-//                    HttpGet get = new HttpGet(uri);
-//                    response = client.execute(get);
-//                    HttpEntity entity = response.getEntity();
-//                    String responseString = EntityUtils.toString(entity, "UTF-8");
-//                    value[0] = responseString;
-//                } catch(Exception e) {
-//                    e.printStackTrace();
-//                    System.out.println(e);
-//
-//                }
-//
-//                Looper.loop(); //Loop in the message queue
-//            }
-//        };
-//
-//        t.start();
-//        try {
-//            Thread.sleep(1500);
-//        } catch(InterruptedException e) {
-//            System.out.println("got interrupted!");
-//        }
-//        return value[0];
-//    }
 
     public void onClickRegister(View v){
         Intent intent = new Intent(MainActivity.this, register.class);

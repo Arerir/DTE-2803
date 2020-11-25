@@ -61,12 +61,12 @@ public class register extends AppCompatActivity {
         reg.put("firstName", firstName.getText().toString());
         reg.put("birthId", name.getText().toString());
 
-        String s = makeRequest("https://danieleli2.asuscomm.com/api/users", reg);
+        makeRequest("https://danieleli2.asuscomm.com/api/Users", reg);
         Intent intent = new Intent(register.this, MainActivity.class);
         startActivity(intent);
     }
 
-    public static String makeRequest(final String uri, final Map<String, String> obj) {
+    public static void makeRequest(final String uri, final Map<String, String> obj) {
         final String[] value = new String[1];
         Thread t = new Thread() {
 
@@ -87,42 +87,21 @@ public class register extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-                RequestBody requestBody = RequestBody.create(mediaType, String.valueOf(json));
-                Request request = new Request.Builder()
-                        .url(uri)
-                        .post(requestBody)
-                        .addHeader("Content-Type", "application/json")
-                        .build();
+                RequestBody requestBody = null;
+                Request request = null;
+                try {
+                    requestBody = RequestBody.create(mediaType, String.valueOf(json));
+                    request = new Request.Builder()
+                            .url(uri)
+                            .post(requestBody)
+                            .addHeader("Content-Type", "application/json")
+                            .build();
 
-
-//                DefaultHttpClient client = new DefaultHttpClient();
-//                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-//                HttpResponse response;
-//                JSONObject json = new JSONObject();
-//
-//                try {
-//                    HttpPost post = new HttpPost(uri);
-//                    for (String i : obj.keySet()) {
-//                        json.put(i, obj.get(i));
-//                    }
-//
-//                    StringEntity se = new StringEntity(json.toString());
-//                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-//                    post.setEntity(se);
-//                    response = client.execute(post);
-//
-//                    HttpEntity entity = response.getEntity();
-//                    String responseString = EntityUtils.toString(entity, "UTF-8");
-//                Buffer buffer = new Buffer();
-//                try {
-//                    request.body().writeTo(buffer);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-
+                } catch (Exception e ) { }
                 Response response = null;
                 try {
                     response = client.newCall(request).execute();
+                    System.out.println(response);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
@@ -148,7 +127,7 @@ public class register extends AppCompatActivity {
         } catch(InterruptedException e) {
             System.out.println("got interrupted!");
         }
-        return value[0];
+//        return value[0];
     }
 
 

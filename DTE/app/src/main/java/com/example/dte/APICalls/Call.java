@@ -47,9 +47,9 @@ public class Call {
         JsonArrayRequest request = new JsonArrayRequest(url, listener, errorListener);
         requestQueue.add(request);
     }
-<<<<<<< HEAD
-} */
-=======
+
+}
+
 
     // TODO missing api controller in asp net web API
     public void getSeverity(int id, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
@@ -57,5 +57,5 @@ public class Call {
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
         requestQueue.add(request);
     }
-}
->>>>>>> 2f8af475c8f1fae6b10ac51856a78cec073cfb9e
+} */
+

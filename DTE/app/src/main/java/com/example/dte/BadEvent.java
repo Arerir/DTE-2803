@@ -1,16 +1,13 @@
 package com.example.dte;
 
-import android.os.Parcel;
-import android.os.Parcelable;
-
-public class BadEvent implements Parcelable {
-    private int id;
-    private String message;
-    private String reason;
-    private String placement;
-    private String date;
-    private int severityId;
-    private int statusId;
+public class BadEvent {
+   private int id;
+   private String message;
+   private String reason;
+   private String placement;
+   private String date;
+   private int severityId;
+   private int statusId;
 
     public BadEvent() {
     }
@@ -80,43 +77,4 @@ public class BadEvent implements Parcelable {
     public void setStatusId(int statusId) {
         this.statusId = statusId;
     }
-
-    protected BadEvent(Parcel in) {
-        id = in.readInt();
-        message = in.readString();
-        reason = in.readString();
-        placement = in.readString();
-        date = in.readString();
-        severityId = in.readInt();
-        statusId = in.readInt();
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(id);
-        dest.writeString(message);
-        dest.writeString(reason);
-        dest.writeString(placement);
-        dest.writeString(date);
-        dest.writeInt(severityId);
-        dest.writeInt(statusId);
-    }
-
-    @SuppressWarnings("unused")
-    public static final Parcelable.Creator<BadEvent> CREATOR = new Parcelable.Creator<BadEvent>() {
-        @Override
-        public BadEvent createFromParcel(Parcel in) {
-            return new BadEvent(in);
-        }
-
-        @Override
-        public BadEvent[] newArray(int size) {
-            return new BadEvent[size];
-        }
-    };
 }

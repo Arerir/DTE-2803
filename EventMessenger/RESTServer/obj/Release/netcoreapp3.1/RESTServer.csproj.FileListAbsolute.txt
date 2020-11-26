@@ -152,3 +152,4 @@ G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcore
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\runtimes\win-arm64\native\e_sqlite3.dll
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\runtimes\win-x64\native\e_sqlite3.dll
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\runtimes\win-x86\native\e_sqlite3.dll
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\web.config

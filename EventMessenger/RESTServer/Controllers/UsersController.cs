@@ -31,7 +31,7 @@ namespace RESTServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
-            var list = await _context.Users.ToListAsync();
+            var list = await _context.Users.Where(x => !x.IsDeleted).ToListAsync();
             var dtoList = new List<UserDTO>();
 
             foreach (var user in list)
@@ -49,7 +49,7 @@ namespace RESTServer.Controllers
         {
             var user = await _context.Users.FindAsync(id);
 
-            if (user == null)
+            if (user == null || user.IsDeleted)
             {
                 return NotFound();
             }
@@ -61,7 +61,7 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutUser(int id, UserDTO user)
+        public async Task<IActionResult> PutUser(int id, [FromBody]UserDTO user)
         {
             //if current user is Admin
             if (id != user.Id)
@@ -74,7 +74,7 @@ namespace RESTServer.Controllers
                 return NotFound();
             }
 
-            var dbObject = _context.Users.FirstOrDefault(x => x.Id == id);
+            var dbObject = _context.Users.First(x => x.Id == id);
 
             dbObject.FirstName = user.FirstName;
             dbObject.SirName = user.SirName;
@@ -88,12 +88,12 @@ namespace RESTServer.Controllers
             try
             {
                 await _context.SaveChangesAsync();
+                return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
+                return StatusCode(StatusCodes.Status500InternalServerError);
             }
-
-            return NoContent();
         }
 
         // POST: api/Users
@@ -103,6 +103,9 @@ namespace RESTServer.Controllers
         public async Task<ActionResult<UserDTO>> PostUser(UserDTO user)
         {
             //if user logged in is authenticated
+
+            if (_context.Users.Any(x => x.Email.Equals(user.Email)))
+                return BadRequest();
 
             var dbObject = new User()
             {
@@ -121,7 +124,7 @@ namespace RESTServer.Controllers
             _context.Users.Add(dbObject);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction("GetUser", new { id = user.Id }, UserDTO.Selector().Compile()(dbObject));
         }
 
         private string GetHashedValue (string input)
@@ -147,6 +150,11 @@ namespace RESTServer.Controllers
             var pass = GetHashedValue(credentials.Password);
 
             var result = _context.Users.Any(x => x.Password == pass && x.BirthId == user && !x.IsDeleted);
+
+            if(result)
+            {
+                _context.Users.First(x => x.Password == pass && x.BirthId == user && !x.IsDeleted).AmountOfLogins++;
+            }
 
             return Ok(result);
         }

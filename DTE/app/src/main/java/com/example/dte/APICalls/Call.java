@@ -5,6 +5,7 @@ import org.json.JSONObject;
 
 import com.android.volley.Cache;
 import com.android.volley.Network;
+import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -16,6 +17,7 @@ import com.android.volley.toolbox.JsonObjectRequest;
 import com.example.dte.BadEvent;
 
 import java.io.File;
+import java.lang.reflect.Method;
 import java.util.List;
 
 
@@ -45,4 +47,15 @@ public class Call {
         JsonArrayRequest request = new JsonArrayRequest(url, listener, errorListener);
         requestQueue.add(request);
     }
+<<<<<<< HEAD
 } */
+=======
+
+    // TODO missing api controller in asp net web API
+    public void getSeverity(int id, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
+        String url = baseUrl + "Severity/" + id;
+        JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
+        requestQueue.add(request);
+    }
+}
+>>>>>>> 2f8af475c8f1fae6b10ac51856a78cec073cfb9e

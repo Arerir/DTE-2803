@@ -13,10 +13,6 @@ namespace RESTServer.Data.DAO
         {
             string strCQL = "SELECT * FROM user";
             Session localSession = GetSession();
-            //Used for putting in properties
-            //PreparedStatement statement = localSession.Prepare(strCQL);
-            //BoundStatement boundStatement = new BoundStatement(statement);
-            //boundStatement.Bind(id);
             RowSet results = localSession.Execute(strCQL);
 
             List<User> users = new List<User>();
@@ -97,6 +93,33 @@ namespace RESTServer.Data.DAO
             var statement = new SimpleStatement("UPDATE user SET firstname =?, sirname =?, password =?, birthid =?, email =?, hasadmin =? " +
                                                 "WHERE id =?", user.FirstName, user.SirName, user.Password, user.BirthId, user.Email, user.HasAdmin, user.Id);
             localSession.Execute(statement);
+        }
+
+        public bool AuthenticateUser(string birthId, string pass)
+        {
+            Session localSession = GetSession();
+            var statement = new SimpleStatement("SELECT * FROM user WHERE birthid=? AND password=?", birthId, pass);
+            RowSet result = localSession.Execute(statement);
+            var user = mapUser(result.GetRows().FirstOrDefault());
+            
+            if(user != null)
+            {
+                statement = new SimpleStatement("UPDATE user SET amountoflogins =? WHERE id =?", user.AmountOfLogins + 1, user.Id);
+                localSession.Execute(statement);
+                return true;
+            }
+            return false;
+        }
+
+        public bool AuthenticateAdmin()
+        {
+            //Get birthid and password from currently logged in user
+            //Session localSession = GetSession();
+            //var statement = new SimpleStatement("SELECT * FROM user WHERE birthid=? AND password=? AND hasadmin='True'", birthId, pass);
+            //RowSet result = localSession.Execute(statement);
+
+            //return mapUser(result.GetRows().FirstOrDefault()) != null;
+            return true;
         }
     }
 }

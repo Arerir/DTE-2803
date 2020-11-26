@@ -155,41 +155,29 @@ namespace RESTServer.Controllers
         [HttpPost("authenticate")]
         public ActionResult PostAuthenticate ([FromBody] LoginDTO credentials)
         {
+            var dao = new UserDAO();
             var user = GetHashedValue(credentials.UserId);
             var pass = GetHashedValue(credentials.Password);
 
-            var result = _context.Users.Any(x => x.Password == pass && x.BirthId == user && !x.IsDeleted);
-
-            if(result)
-            {
-                _context.Users.First(x => x.Password == pass && x.BirthId == user && !x.IsDeleted).AmountOfLogins++;
-            }
-
-            return Ok(result);
+            return Ok(dao.AuthenticateUser(user, pass));
         }
 
         // DELETE: api/Users/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteUser(int id)
+        public ActionResult<bool> DeleteUser(int id)
         {
             // if user is Authenticated and id != currentUser.Id
+            var dao = new UserDAO();
 
-            var user = await _context.Users.FindAsync(id);
+            var user = dao.GetUser(id);
             if (user == null)
             {
                 return NotFound();
             }
 
             user.IsDeleted = true;
-
-            await _context.SaveChangesAsync();
-
+            dao.UpdateUser(user);
             return true;
-        }
-
-        private bool UserExists(int id)
-        {
-            return _context.Users.Any(e => e.Id == id);
         }
     }
 }

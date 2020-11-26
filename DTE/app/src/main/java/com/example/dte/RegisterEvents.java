@@ -66,7 +66,6 @@ public class RegisterEvents extends AppCompatActivity {
         reg.put("severityId", Integer.parseInt(serverityId.getSelectedItem().toString()));
         reg.put("date", date.getYear()+"-"+(date.getMonth()+1)+"-"+date.getDayOfMonth());
 
-        System.out.println(reg);
         String s = makeRequest("https://danieleli2.asuscomm.com/api/BadEvents/", reg);
         Intent intent = new Intent(RegisterEvents.this, NavigationEvents.class);
         startActivity(intent);
@@ -137,6 +136,7 @@ public class RegisterEvents extends AppCompatActivity {
         } catch (InterruptedException e) {
             System.out.println("got interrupted!");
         }
+
         return value[0];
     }
 

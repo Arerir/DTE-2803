@@ -11,7 +11,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".Events"></activity>
+        <activity android:name=".sendMessage"></activity>
+        <activity android:name=".Events" />
         <activity android:name=".ViewEvent" />
         <activity android:name=".ShowEvents" />
         <activity android:name=".NavigationEvents" />

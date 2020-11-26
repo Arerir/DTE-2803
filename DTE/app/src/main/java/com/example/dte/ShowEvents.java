@@ -120,6 +120,7 @@ public class ShowEvents extends AppCompatActivity {
         } catch(InterruptedException e) {
             System.out.println("got interrupted!");
         }
+
         return value[0];
     }
 

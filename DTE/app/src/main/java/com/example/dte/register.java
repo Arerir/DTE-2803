@@ -127,6 +127,11 @@ public class register extends AppCompatActivity {
         } catch(InterruptedException e) {
             System.out.println("got interrupted!");
         }
+        try {
+            t.join();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 //        return value[0];
     }
 
@@ -205,6 +210,7 @@ public class register extends AppCompatActivity {
         } catch(InterruptedException e) {
             System.out.println("got interrupted!");
         }
+
         return value[0];
     }
 }

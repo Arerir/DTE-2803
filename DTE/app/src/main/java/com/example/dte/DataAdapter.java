@@ -33,7 +33,7 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         final BadEvent events = event.get(position);
         holder.nameView.setText(events.getPlacement());
         holder.timeView.setText(events.getDate());
-        holder.alvorlighetsgradView.setText(Integer.toString(events.getSeverityId()));
+        holder.alvorlighetsgradView.setText(events.getStatusId()==1?Integer.toString(events.getSeverityId()): "Grad");
 
     }
 

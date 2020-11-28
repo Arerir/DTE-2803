@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using RESTServer.Data;
+using RESTServer.Data.DAO;
 using RESTServer.Data.DTO;
 using RESTServer.Entities;
 using RESTServer.Models;
@@ -27,55 +28,46 @@ namespace RESTServer.Controllers
 
         // GET: api/BadEvents
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BadEventDTO>>> GetEvents()
+        public ActionResult<IEnumerable<BadEventDTO>> GetEvents()
         {
             // if user is authenticated
+            //limit list by .WhereIf(!user.HasAdmin, x => x.UserId == user.Id)
 
-            //limit list by user.HasAdmin ? All : .Where(x => x.CreatedBy == user.Id)
+            var dao = new BadEventDAO();
+            var list = dao.GetBadEvents(false)// limit here
+                .Select(BadEventDTO.Selector().Compile()).ToList();
+            
+            //use to populate BadEvents from earlier solution
+            //var list_ = _context.Events.ToList();
+            //foreach (var badEvent in list_)
+            //    dao.CreateBadEvent(badEvent);
 
-            var list = await _context.Events.Where(x => !x.IsDeleted && !x.Archived).ToListAsync();
-
-            var dtoList = new List<BadEventDTO>();
-
-            foreach (var item in list)
-            {
-                dtoList.Add(BadEventDTO.Selector().Compile()(item));
-            }
-
-            return dtoList;
+            return list;
         }
         // GET: api/BadEvents/archive
         [HttpGet("archive")]
-        public async Task<ActionResult<IEnumerable<BadEventDTO>>> GetArchive()
+        public ActionResult<IEnumerable<BadEventDTO>> GetArchive()
         {
             // if user is authenticated
+            //limit list by .WhereIf(!user.HasAdmin, x => x.UserId == user.Id)
 
-            //limit list by user.HasAdmin ? All : .Where(x => x.CreatedBy == user.Id)
+            var dao = new BadEventDAO();
+            var list = dao.GetBadEvents(true).Select(BadEventDTO.Selector().Compile()).ToList();// limit here
 
-            var list = await _context.Events.Where(x => !x.IsDeleted && x.Archived).ToListAsync();
-
-            var dtoList = new List<BadEventDTO>();
-
-            foreach (var item in list)
-            {
-                dtoList.Add(BadEventDTO.Selector().Compile()(item));
-            }
-
-            return dtoList;
+            return list;
         }
 
         // GET: api/BadEvents/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<BadEventDTO>> GetBadEvent(int id)
+        public ActionResult<BadEventDTO> GetBadEvent(int id)
         {
             // check user Access
+            var dao = new BadEventDAO();
 
-            var badEvent = await _context.Events.FindAsync(id);
-
-            if (badEvent == null && !badEvent.IsDeleted)
-            {
+            var badEvent = dao.GetBadEvent(id);
+            
+            if (badEvent == null || badEvent.IsDeleted)
                 return NotFound();
-            }
 
             return BadEventDTO.Selector().Compile()(badEvent);
         }
@@ -84,19 +76,17 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutBadEvent(int id, BadEventDTO dto)
+        public IActionResult PutBadEvent(int id, BadEventDTO dto)
         {
             // check user Access
             if (id != dto.Id)
-            {
                 return BadRequest();
-            }
-            if (!BadEventExists(id))
-            {
-                return NotFound();
-            }
 
-            var badEvent = _context.Events.First(x => x.Id == id && !x.IsDeleted && !x.Archived);
+            var dao = new BadEventDAO();
+            var badEvent = dao.GetBadEvent(id);
+
+            if (badEvent == null)
+                return NotFound();
 
             badEvent.Date = dto.Date;
             badEvent.Message = dto.Message;
@@ -107,11 +97,9 @@ namespace RESTServer.Controllers
             badEvent.Modified = DateTime.Now;
             badEvent.ModifiedById = 1; //Exchange for current user
 
-            _context.Entry(badEvent).State = EntityState.Modified;
-
             try
             {
-                await _context.SaveChangesAsync();
+                dao.UpdateBadEvent(badEvent);
                 return Ok();
             }
             catch (DbUpdateConcurrencyException)
@@ -121,26 +109,21 @@ namespace RESTServer.Controllers
         }
 
         [HttpPut("archive/{id}")]
-        public async Task<IActionResult> PutArchive(int id, BadEventDTO dto)
+        public IActionResult PutArchive(int id, BadEventDTO dto)
         {
             // check user Access
             if (id != dto.Id)
-            {
                 return BadRequest();
-            }
-            if (!BadEventExists(id))
-            {
+
+            var dao = new BadEventDAO();
+            var badEvent = dao.GetBadEvent(id);
+
+            if (badEvent == null)
                 return NotFound();
-            }
-
-            var badEvent = _context.Events.First(x => x.Id == id);
-
-
-            badEvent.Archived = true;
 
             try
             {
-                await _context.SaveChangesAsync();
+                dao.ArchiveBadEvent(id);
                 return Ok();
             }
             catch (DbUpdateConcurrencyException)
@@ -153,7 +136,7 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<BadEventDTO>> PostBadEvent(BadEventDTO dto)
+        public ActionResult<BadEventDTO> PostBadEvent(BadEventDTO dto)
         {
             //Exchange CreatedByID for current user
             var badEvent = new BadEvent()
@@ -169,31 +152,25 @@ namespace RESTServer.Controllers
                 StatusId = 1
             };
 
-            _context.Events.Add(badEvent);
-            await _context.SaveChangesAsync();
+            var dao = new BadEventDAO();
+            var id = dao.CreateBadEvent(badEvent);
 
-            return CreatedAtAction("GetBadEvent", new { id = badEvent.Id }, BadEventDTO.Selector().Compile()(badEvent));
+            return CreatedAtAction("GetBadEvent", new { id }, BadEventDTO.Selector().Compile()(dao.GetBadEvent(id)));
         }
 
         // DELETE: api/BadEvents/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteBadEvent(int id)
+        public ActionResult<bool> DeleteBadEvent(int id)
         {
-            var badEvent = await _context.Events.FindAsync(id);
+            //if user is authenticated
+            var dao = new BadEventDAO();
+            var badEvent = dao.GetBadEvent(id);
             if (badEvent == null)
-            {
                 return NotFound();
-            }
 
             badEvent.IsDeleted = true;
-            await _context.SaveChangesAsync();
-
+            dao.UpdateBadEvent(badEvent);
             return true;
-        }
-
-        private bool BadEventExists(int id)
-        {
-            return _context.Events.Any(e => e.Id == id);
         }
     }
 }

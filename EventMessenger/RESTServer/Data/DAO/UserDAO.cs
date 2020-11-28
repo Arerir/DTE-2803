@@ -18,9 +18,7 @@ namespace RESTServer.Data.DAO
             List<User> users = new List<User>();
 
             foreach (var row in results.GetRows())
-            {
                 users.Add(mapUser(row));
-            }
 
             return users;
         }
@@ -74,9 +72,8 @@ namespace RESTServer.Data.DAO
                 var id = results.GetRows().FirstOrDefault().FirstOrDefault();
 
                 if (id == null)
-                {
                     id = 1;
-                }
+
                 user.Id = (int)id;
             }
 

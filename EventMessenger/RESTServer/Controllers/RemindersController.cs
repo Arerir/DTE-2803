@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RESTServer.Data;
+using RESTServer.Data.DAO;
 using RESTServer.Data.DTO;
 using RESTServer.Models;
 
@@ -24,35 +25,36 @@ namespace RESTServer.Controllers
 
         // GET: api/Reminders
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ReminderDTO>>> GetReminders()
+        public ActionResult<IEnumerable<ReminderDTO>> GetReminders()
         {
-            var list = await _context.Reminders.Where(x => !x.IsDeleted).Include(x => x.CreatedBy).ToListAsync();
-            var dtoList = new List<ReminderDTO>();
+            //authenticate user
+            var dao = new ReminderDAO();
+            var list = dao.GetReminders() //limit here with .WhereIf(!user.HasAdmin, x => x.UserId == user.Id)
+                        .Select(ReminderDTO.Selector().Compile()).ToList();
 
-            foreach (var reminder in list)
-            {
-                var dto = ReminderDTO.Selector().Compile()(reminder);
-                dtoList.Add(dto);
-            }
+            //use to populate BadEvents from earlier solution
+            //var list_ = _context.Reminders.ToList();
+            //foreach (var reminder in list_)
+            //    dao.CreateReminder(reminder);
 
-            return dtoList;
+            return list;
         }
 
         // GET: api/Reminders/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ReminderDTO>> GetReminder(int id)
+        public ActionResult<ReminderDTO> GetReminder(int id)
         {
-            var reminder = await _context.Reminders.FindAsync(id);
+            //authenticate user
+            var dao = new ReminderDAO();
+            var reminder = dao.GetReminder(id);
 
             if (reminder == null)
-            {
                 return NotFound();
-            }
 
             var dto = ReminderDTO.Selector().Compile()(reminder);
 
-            var user = await _context.Users.FindAsync(reminder.CreatedById);
-
+            var userdao = new UserDAO();
+            var user = userdao.GetUser(reminder.CreatedById);
             dto.SendtFrom = user.FirstName + " " + user.SirName;
 
             return dto;
@@ -62,29 +64,26 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutReminder(int id, [FromBody]ReminderDTO reminder)
+        public IActionResult PutReminder(int id, [FromBody]ReminderDTO reminder)
         {
             if (id != reminder.Id)
-            {
                 return BadRequest();
-            }
-            if (!ReminderExists(id))
-            {
-                return NotFound();
-            }
+            //authenticate user
+            var dao = new ReminderDAO();
+            var dbObject = dao.GetReminder(id);
 
-            var dbObject = _context.Reminders.First(x => x.Id == id);
+            if (dbObject == null)
+                return NotFound();
 
             dbObject.EventId = reminder.EventId;
             dbObject.Date = reminder.EventDate;
             dbObject.Message = reminder.Message;
             dbObject.Modified = DateTime.Now;
             dbObject.ModifiedById = 1; //Exchange for current user
-            _context.Entry(dbObject).State = EntityState.Modified;
 
             try
             {
-                await _context.SaveChangesAsync();
+                dao.UpdateReminder(dbObject);
                 return Ok();
             }
             catch (DbUpdateConcurrencyException)
@@ -97,9 +96,11 @@ namespace RESTServer.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to, for
         // more details, see https://go.microsoft.com/fwlink/?linkid=2123754.
         [HttpPost]
-        public async Task<ActionResult<ReminderDTO>> PostReminder([FromBody]ReminderDTO dto)
+        public ActionResult<ReminderDTO> PostReminder([FromBody]ReminderDTO dto)
         {
+            //authenticate user
             //Exchange CreatedByID for current user
+            var dao = new ReminderDAO();
             var reminder = new Reminder()
             {
                 Created = DateTime.Now,
@@ -109,32 +110,25 @@ namespace RESTServer.Controllers
                 Message = dto.Message
             };
 
-            _context.Reminders.Add(reminder);
-            await _context.SaveChangesAsync();
+            var id = dao.CreateReminder(reminder);
 
-            return CreatedAtAction("GetReminder", new { id = reminder.Id }, ReminderDTO.Selector().Compile()(reminder));
+            return CreatedAtAction("GetReminder", new { id }, ReminderDTO.Selector().Compile()(dao.GetReminder(id)));
         }
 
         // DELETE: api/Reminders/5
         [HttpDelete("{id}")]
-        public async Task<ActionResult<bool>> DeleteReminder(int id)
+        public ActionResult<bool> DeleteReminder(int id)
         {
-            //Only run if user is authenticated
-            var reminder = await _context.Reminders.FindAsync(id);
+            //authenticate user
+            var dao = new ReminderDAO();
+            var reminder = dao.GetReminder(id);
+            
             if (reminder == null)
-            {
                 return NotFound();
-            }
 
             reminder.IsDeleted = true;
-            await _context.SaveChangesAsync();
-
+            dao.UpdateReminder(reminder);
             return true;
-        }
-
-        private bool ReminderExists(int id)
-        {
-            return _context.Reminders.Any(e => e.Id == id);
         }
     }
 }

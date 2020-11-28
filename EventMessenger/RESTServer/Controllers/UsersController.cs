@@ -30,37 +30,33 @@ namespace RESTServer.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
+        public ActionResult<IEnumerable<UserDTO>> GetUsers()
         {
+            // if user is authenticated as admin
             var dao = new UserDAO();
+            var list = dao.GetUsers().Select(UserDTO.Selector().Compile()).ToList();
 
-            var list = dao.GetUsers();
-            //var list = await _context.Users.Where(x => !x.IsDeleted).ToListAsync(); use to add users from earlier solution
+            //use to populate users from earlier solution
+            //var list_ = await _context.Users.Where(x => !x.IsDeleted).ToListAsync();
+            //foreach (var user in list_)
+            //{
+            //    dao.CreateUser(user);
+            //}
 
-            var dtoList = new List<UserDTO>();
-
-            foreach (var user in list)
-            {
-                //dao.CreateUser(user);use to add users from earlier solution
-                var dto = UserDTO.Selector().Compile()(user);
-                dtoList.Add(dto);
-            }
-
-            return dtoList;
+            return list;
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
         public ActionResult<UserDTO> GetUser(int id)
         {
+            // if user is authenticated and id = currentuser id
             var dao = new UserDAO();
 
             var user = dao.GetUser(id);
 
             if (user == null || user.IsDeleted)
-            {
                 return NotFound();
-            }
 
             return UserDTO.Selector().Compile()(user);
         }
@@ -76,16 +72,12 @@ namespace RESTServer.Controllers
             var dao = new UserDAO();
 
             if (id != user.Id)
-            {
                 return BadRequest();
-            }
 
             var dbObject = dao.GetUser(id);
 
             if(dbObject == null)
-            {
                 return NotFound();
-            }
 
             dbObject.FirstName = user.FirstName;
             dbObject.SirName = user.SirName;
@@ -145,9 +137,7 @@ namespace RESTServer.Controllers
                 shaM.ComputeHash(bytes);
 
                 foreach(var b in shaM.Hash)
-                {
                     builder.Append(b.ToString("X2"));
-                }
             }
             return builder.ToString();
         }
@@ -171,9 +161,7 @@ namespace RESTServer.Controllers
 
             var user = dao.GetUser(id);
             if (user == null)
-            {
                 return NotFound();
-            }
 
             user.IsDeleted = true;
             dao.UpdateUser(user);

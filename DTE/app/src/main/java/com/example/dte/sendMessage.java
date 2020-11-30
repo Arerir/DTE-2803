@@ -10,22 +10,14 @@ import android.widget.EditText;
 
 import com.example.dte.APICalls.Helper;
 
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicHeader;
-import org.apache.http.params.HttpConnectionParams;
-import org.apache.http.protocol.HTTP;
-import org.apache.http.util.EntityUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.security.cert.CertificateException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,33 +34,33 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class register extends AppCompatActivity {
-
+public class sendMessage extends AppCompatActivity {
+    private static final DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_register);
+        setContentView(R.layout.activity_send_message);
     }
 
     public void onClickBtn(View v)
     {
 
-        EditText name = (EditText) findViewById(R.id.name);
-        EditText password = (EditText) findViewById(R.id.password);
-        EditText firstName = (EditText) findViewById(R.id.fødselsnummer);
-        EditText email = (EditText) findViewById(R.id.epostadressen);
-        Map<String, String> reg = new HashMap<String, String>();
-        reg.put("email", email.getText().toString());
-        reg.put("password", password.getText().toString());
-        reg.put("firstName", firstName.getText().toString());
-        reg.put("birthId", name.getText().toString());
-
-        makeRequest("https://danieleli2.asuscomm.com/api/Users", reg);
-        Intent intent = new Intent(register.this, MainActivity.class);
+        EditText message = (EditText) findViewById(R.id.message);
+        Bundle arguments = getIntent().getExtras();
+        Map<String, Object> reg = new HashMap<String, Object>();
+        reg.put("eventId", Integer.parseInt(arguments.get("id").toString()));
+        reg.put("message", message.getText().toString());
+        reg.put("eventDate", arguments.get("date"));
+        Date date = new Date();
+        reg.put("reminderDate", sdf.format(date));
+        System.out.println(reg);
+        makeRequest("https://danieleli2.asuscomm.com/api/Reminders/", reg);
+        Intent intent = new Intent(sendMessage.this, Events.class);
+        intent.putExtra("id", Integer.parseInt(arguments.get("id").toString()));
         startActivity(intent);
     }
 
-    public static void makeRequest(final String uri, final Map<String, String> obj) {
+    public static void makeRequest(final String uri, final Map<String, Object> obj) {
         final String[] value = new String[1];
         Thread t = new Thread() {
 
@@ -129,50 +121,9 @@ public class register extends AppCompatActivity {
         } catch(InterruptedException e) {
             System.out.println("got interrupted!");
         }
-        try {
-            t.join();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
 //        return value[0];
     }
 
 
 
-
-    public static String makeRequest(final String uri) {
-        final String[] value = new String[1];
-        Thread t = new Thread() {
-
-            public void run() {
-                Looper.prepare(); //For Preparing Message Pool for the child Thread
-                HttpClient client = new DefaultHttpClient();
-                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-                HttpResponse response;
-
-                try {
-                    HttpGet get = new HttpGet(uri);
-                    response = client.execute(get);
-                    HttpEntity entity = response.getEntity();
-                    String responseString = EntityUtils.toString(entity, "UTF-8");
-                    value[0] = responseString;
-                } catch(Exception e) {
-                    e.printStackTrace();
-                    System.out.println(e);
-
-                }
-
-                Looper.loop(); //Loop in the message queue
-            }
-        };
-
-        t.start();
-        try {
-            Thread.sleep(1500);
-        } catch(InterruptedException e) {
-            System.out.println("got interrupted!");
-        }
-
-        return value[0];
-    }
 }

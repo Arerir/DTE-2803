@@ -1,4 +1,4 @@
-package com.example.dte.APICalls;
+/* package com.example.dte.APICalls;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -48,10 +48,14 @@ public class Call {
         requestQueue.add(request);
     }
 
+}
+
+
     // TODO missing api controller in asp net web API
     public void getSeverity(int id, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         String url = baseUrl + "Severity/" + id;
         JsonObjectRequest request = new JsonObjectRequest(Request.Method.GET, url, null, listener, errorListener);
         requestQueue.add(request);
     }
-}
+} */
+

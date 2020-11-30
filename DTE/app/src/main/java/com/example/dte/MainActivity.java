@@ -17,6 +17,7 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.dte.APICalls.Helper;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -96,7 +97,7 @@ public class MainActivity extends AppCompatActivity {
 
             public void run() {
                 Looper.prepare(); //For Preparing Message Pool for the child Thread
-                OkHttpClient client = getUnsafeOkHttpClient();
+                OkHttpClient client = Helper.getUnsafeOkHttpClient().build();
 
                 MediaType mediaType = MediaType.parse("application/json");
 
@@ -111,38 +112,18 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
-                RequestBody requestBody = RequestBody.create(mediaType, String.valueOf(json));
-                Request request = new Request.Builder()
-                        .url(uri)
-                        .post(requestBody)
-                        .addHeader("Content-Type", "application/json")
-                        .build();
+                RequestBody requestBody = null;
+                Request request = null;
+                try {
+                    requestBody = RequestBody.create(mediaType, String.valueOf(json));
+                    request = new Request.Builder()
+                            .url(uri)
+                            .post(requestBody)
+                            .addHeader("Content-Type", "application/json")
+                            .build();
 
+                } catch (Exception e ) { }
 
-//                DefaultHttpClient client = new DefaultHttpClient();
-//                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-//                HttpResponse response;
-//                JSONObject json = new JSONObject();
-//
-//                try {
-//                    HttpPost post = new HttpPost(uri);
-//                    for (String i : obj.keySet()) {
-//                        json.put(i, obj.get(i));
-//                    }
-//
-//                    StringEntity se = new StringEntity(json.toString());
-//                    se.setContentType(new BasicHeader(HTTP.CONTENT_TYPE, "application/json"));
-//                    post.setEntity(se);
-//                    response = client.execute(post);
-//
-//                    HttpEntity entity = response.getEntity();
-//                    String responseString = EntityUtils.toString(entity, "UTF-8");
-//                Buffer buffer = new Buffer();
-//                try {
-//                    request.body().writeTo(buffer);
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
                 
                 Response response = null;
                 try {
@@ -172,86 +153,12 @@ public class MainActivity extends AppCompatActivity {
         } catch(InterruptedException e) {
             System.out.println("got interrupted!");
         }
+
         return Boolean.parseBoolean(value[0]);
     }
 
 
-    private static OkHttpClient getUnsafeOkHttpClient() {
-        try {
-            // Create a trust manager that does not validate certificate chains
-            final TrustManager[] trustAllCerts = new TrustManager[] {
-                    new X509TrustManager() {
-                        @Override
-                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                        }
 
-                        @Override
-                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
-                        }
-
-                        @Override
-                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
-                            return new java.security.cert.X509Certificate[]{};
-                        }
-                    }
-            };
-
-            // Install the all-trusting trust manager
-            final SSLContext sslContext = SSLContext.getInstance("SSL");
-            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
-            // Create an ssl socket factory with our all-trusting manager
-            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
-
-            OkHttpClient.Builder builder = new OkHttpClient.Builder();
-            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager)trustAllCerts[0]);
-            builder.hostnameVerifier(new HostnameVerifier() {
-                @Override
-                public boolean verify(String hostname, SSLSession session) {
-                    return true;
-                }
-            });
-
-            OkHttpClient okHttpClient = builder.build();
-            return okHttpClient;
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-//    public static String makeRequest(final String uri) {
-//        final String[] value = new String[1];
-//        Thread t = new Thread() {
-//
-//            public void run() {
-//                Looper.prepare(); //For Preparing Message Pool for the child Thread
-//                HttpClient client = new DefaultHttpClient();
-//                HttpConnectionParams.setConnectionTimeout(client.getParams(), 10000); //Timeout Limit
-//                HttpResponse response;
-//
-//                try {
-//                    HttpGet get = new HttpGet(uri);
-//                    response = client.execute(get);
-//                    HttpEntity entity = response.getEntity();
-//                    String responseString = EntityUtils.toString(entity, "UTF-8");
-//                    value[0] = responseString;
-//                } catch(Exception e) {
-//                    e.printStackTrace();
-//                    System.out.println(e);
-//
-//                }
-//
-//                Looper.loop(); //Loop in the message queue
-//            }
-//        };
-//
-//        t.start();
-//        try {
-//            Thread.sleep(1500);
-//        } catch(InterruptedException e) {
-//            System.out.println("got interrupted!");
-//        }
-//        return value[0];
-//    }
 
     public void onClickRegister(View v){
         Intent intent = new Intent(MainActivity.this, register.class);

@@ -7,7 +7,9 @@
     tools:context=".RegisterEvents">
 
 
-    <EditText
+    <TextView
+        android:textAllCaps="true"
+        android:textSize="25dp"
         android:id="@+id/name"
         android:layout_width="342dp"
         android:layout_height="49dp"

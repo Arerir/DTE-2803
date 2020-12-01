@@ -92,20 +92,11 @@ namespace RESTServer.Data.DAO
             localSession.Execute(statement);
         }
 
-        public bool AuthenticateUser(string birthId, string pass)
+        public void AuthenticateUser(int amountOfLogins, int userId)
         {
             Session localSession = GetSession();
-            var statement = new SimpleStatement("SELECT * FROM user WHERE birthid=? AND password=?", birthId, pass);
-            RowSet result = localSession.Execute(statement);
-            var user = mapUser(result.GetRows().FirstOrDefault());
-            
-            if(user != null)
-            {
-                statement = new SimpleStatement("UPDATE user SET amountoflogins =? WHERE id =?", user.AmountOfLogins + 1, user.Id);
-                localSession.Execute(statement);
-                return true;
-            }
-            return false;
+            var statement = new SimpleStatement("UPDATE user SET amountoflogins =? WHERE id =?", amountOfLogins + 1, userId);
+            localSession.Execute(statement);
         }
 
         public bool AuthenticateAdmin()

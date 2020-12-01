@@ -1,6 +1,5 @@
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\appsettings.Development.json
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\appsettings.json
-G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\Properties\launchSettings.json
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\RESTServer.exe
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\RESTServer.deps.json
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\RESTServer.runtimeconfig.json
@@ -153,3 +152,9 @@ G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcore
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\runtimes\win-x64\native\e_sqlite3.dll
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\runtimes\win-x86\native\e_sqlite3.dll
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\web.config
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\Cassandra.dll
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\K4os.Compression.LZ4.dll
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\System.CodeDom.dll
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\System.Management.dll
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Release\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Management.dll
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Release\netcoreapp3.1\scopedcss\bundle\RESTServer.styles.css

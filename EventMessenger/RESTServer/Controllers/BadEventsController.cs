@@ -36,7 +36,7 @@ namespace RESTServer.Controllers
             var dao = new BadEventDAO();
             var list = dao.GetBadEvents(false)// limit here
                 .Select(BadEventDTO.Selector().Compile()).ToList();
-            
+
             //use to populate BadEvents from earlier solution
             //var list_ = _context.Events.ToList();
             //foreach (var badEvent in list_)

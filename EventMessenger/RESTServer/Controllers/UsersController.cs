@@ -37,7 +37,7 @@ namespace RESTServer.Controllers
             var list = dao.GetUsers().Select(UserDTO.Selector().Compile()).ToList();
 
             //use to populate users from earlier solution
-            //var list_ = await _context.Users.Where(x => !x.IsDeleted).ToListAsync();
+            //var list_ = _context.Users.Where(x => !x.IsDeleted).ToList();
             //foreach (var user in list_)
             //{
             //    dao.CreateUser(user);
@@ -148,10 +148,17 @@ namespace RESTServer.Controllers
         public ActionResult PostAuthenticate ([FromBody] LoginDTO credentials)
         {
             var dao = new UserDAO();
-            var user = GetHashedValue(credentials.UserId);
+            var userName = GetHashedValue(credentials.UserId);
             var pass = GetHashedValue(credentials.Password);
 
-            return Ok(dao.AuthenticateUser(user, pass));
+            var users = dao.GetUsers();
+
+            var user = users.FirstOrDefault(x => x.BirthId == userName && x.Password == pass && !x.IsDeleted);
+
+            if (user != null)
+                dao.AuthenticateUser(user.AmountOfLogins, user.Id);
+
+            return Ok(user != null);
         }
 
         // DELETE: api/Users/5

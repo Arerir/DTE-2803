@@ -58,6 +58,7 @@ namespace RESTServer.Controllers
             if (user == null || user.IsDeleted)
                 return NotFound();
 
+            //select only the needed fields for transfer as described in dto
             return UserDTO.Selector().Compile()(user);
         }
 
@@ -110,6 +111,7 @@ namespace RESTServer.Controllers
             if (dao.UserExists(GetHashedValue(user.BirthId)))
                 return BadRequest();
 
+            //create new user object
             var dbObject = new User()
             {
                 Id = 0,
@@ -172,6 +174,7 @@ namespace RESTServer.Controllers
             if (user == null)
                 return NotFound();
 
+            //soft delete user
             user.IsDeleted = true;
             dao.UpdateUser(user);
             return true;

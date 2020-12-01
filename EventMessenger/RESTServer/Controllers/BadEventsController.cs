@@ -48,6 +48,8 @@ namespace RESTServer.Controllers
         [HttpGet("archive")]
         public ActionResult<IEnumerable<BadEventDTO>> GetArchive()
         {
+            //same as above only filtered by the archived
+
             // if user is authenticated
             //limit list by .WhereIf(!user.HasAdmin, x => x.UserId == user.Id)
 
@@ -69,6 +71,7 @@ namespace RESTServer.Controllers
             if (badEvent == null || badEvent.IsDeleted)
                 return NotFound();
 
+            //select only the needed fields for transfer as described in dto
             return BadEventDTO.Selector().Compile()(badEvent);
         }
 
@@ -79,6 +82,7 @@ namespace RESTServer.Controllers
         public IActionResult PutBadEvent(int id, BadEventDTO dto)
         {
             // check user Access
+            //check for a bad request
             if (id != dto.Id)
                 return BadRequest();
 
@@ -112,6 +116,8 @@ namespace RESTServer.Controllers
         public IActionResult PutArchive(int id, BadEventDTO dto)
         {
             // check user Access
+
+            //check for a bad request
             if (id != dto.Id)
                 return BadRequest();
 
@@ -139,6 +145,8 @@ namespace RESTServer.Controllers
         public ActionResult<BadEventDTO> PostBadEvent(BadEventDTO dto)
         {
             //Exchange CreatedByID for current user
+
+            //create new event object
             var badEvent = new BadEvent()
             {
                 Created = DateTime.Now,
@@ -168,6 +176,7 @@ namespace RESTServer.Controllers
             if (badEvent == null)
                 return NotFound();
 
+            //soft delete event
             badEvent.IsDeleted = true;
             dao.UpdateBadEvent(badEvent);
             return true;

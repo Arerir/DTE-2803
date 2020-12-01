@@ -51,12 +51,14 @@ namespace RESTServer.Controllers
             if (reminder == null)
                 return NotFound();
 
+            //select only the needed fields for transfer as described in dto
             var dto = ReminderDTO.Selector().Compile()(reminder);
 
             var userdao = new UserDAO();
             var user = userdao.GetUser(reminder.CreatedById);
             dto.SendtFrom = user.FirstName + " " + user.SirName;
 
+            //return dto
             return dto;
         }
 
@@ -66,6 +68,7 @@ namespace RESTServer.Controllers
         [HttpPut("{id}")]
         public IActionResult PutReminder(int id, [FromBody]ReminderDTO reminder)
         {
+            //check for a bad request
             if (id != reminder.Id)
                 return BadRequest();
             //authenticate user
@@ -126,6 +129,7 @@ namespace RESTServer.Controllers
             if (reminder == null)
                 return NotFound();
 
+            //soft delete reminder
             reminder.IsDeleted = true;
             dao.UpdateReminder(reminder);
             return true;

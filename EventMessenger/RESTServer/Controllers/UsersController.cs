@@ -31,15 +31,18 @@ namespace RESTServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDTO>>> GetUsers()
         {
+            //fetch all users
             var list = await _context.Users.Where(x => !x.IsDeleted).ToListAsync();
             var dtoList = new List<UserDTO>();
 
+            //select only the needed fields for transfer as described in dto
             foreach (var user in list)
             {
                 var dto = UserDTO.Selector().Compile()(user);
                 dtoList.Add(dto);
             }
 
+            //return dto list
             return dtoList;
         }
 
@@ -49,11 +52,13 @@ namespace RESTServer.Controllers
         {
             var user = await _context.Users.FindAsync(id);
 
+            //check if the user is found
             if (user == null || user.IsDeleted)
             {
                 return NotFound();
             }
 
+            //select only the needed fields for transfer as described in dto
             return UserDTO.Selector().Compile()(user);
         }
 
@@ -64,11 +69,13 @@ namespace RESTServer.Controllers
         public async Task<IActionResult> PutUser(int id, [FromBody]UserDTO user)
         {
             //if current user is Admin
+            //check for a bad request
             if (id != user.Id)
             {
                 return BadRequest();
             }
 
+            //check if the user exists
             if (!UserExists(id))
             {
                 return NotFound();
@@ -76,6 +83,7 @@ namespace RESTServer.Controllers
 
             var dbObject = _context.Users.First(x => x.Id == id);
 
+            //change the dto fields
             dbObject.FirstName = user.FirstName;
             dbObject.SirName = user.SirName;
             dbObject.Password = !string.IsNullOrEmpty(user.Password) ? GetHashedValue(user.Password) : dbObject.Password;
@@ -87,6 +95,7 @@ namespace RESTServer.Controllers
 
             try
             {
+                //try to save the changes
                 await _context.SaveChangesAsync();
                 return Ok();
             }
@@ -107,6 +116,7 @@ namespace RESTServer.Controllers
             if (_context.Users.Any(x => x.Email.Equals(user.Email)))
                 return BadRequest();
 
+            //create new user object
             var dbObject = new User()
             {
                 Active = false,
@@ -120,10 +130,11 @@ namespace RESTServer.Controllers
                 SirName = user.SirName
             };
 
-
+            //save user to db
             _context.Users.Add(dbObject);
             await _context.SaveChangesAsync();
 
+            //return the new object with the new id
             return CreatedAtAction("GetUser", new { id = user.Id }, UserDTO.Selector().Compile()(dbObject));
         }
 
@@ -146,9 +157,11 @@ namespace RESTServer.Controllers
         [HttpPost("authenticate")]
         public ActionResult PostAuthenticate ([FromBody] LoginDTO credentials)
         {
+            //translate credentials to hashed value
             var user = GetHashedValue(credentials.UserId);
             var pass = GetHashedValue(credentials.Password);
 
+            //check if the user exists
             var result = _context.Users.Any(x => x.Password == pass && x.BirthId == user && !x.IsDeleted);
 
             if(result)
@@ -156,6 +169,7 @@ namespace RESTServer.Controllers
                 _context.Users.First(x => x.Password == pass && x.BirthId == user && !x.IsDeleted).AmountOfLogins++;
             }
 
+            //return bool
             return Ok(result);
         }
 
@@ -165,12 +179,14 @@ namespace RESTServer.Controllers
         {
             // if user is Authenticated and id != currentUser.Id
 
+            //fetch user
             var user = await _context.Users.FindAsync(id);
             if (user == null)
             {
                 return NotFound();
             }
 
+            //soft delete user
             user.IsDeleted = true;
 
             await _context.SaveChangesAsync();

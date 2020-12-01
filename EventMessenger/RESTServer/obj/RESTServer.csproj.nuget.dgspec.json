@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "D:\\CsharpSolutions\\SKHOS Oppgave3\\EventMessenger\\RESTServer\\RESTServer.csproj": {}
+    "G:\\Users\\Eli\\VisualStudio\\DTE-2803\\EventMessenger\\RESTServer\\RESTServer.csproj": {}
   },
   "projects": {
-    "D:\\CsharpSolutions\\SKHOS Oppgave3\\EventMessenger\\RESTServer\\RESTServer.csproj": {
+    "G:\\Users\\Eli\\VisualStudio\\DTE-2803\\EventMessenger\\RESTServer\\RESTServer.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\CsharpSolutions\\SKHOS Oppgave3\\EventMessenger\\RESTServer\\RESTServer.csproj",
+        "projectUniqueName": "G:\\Users\\Eli\\VisualStudio\\DTE-2803\\EventMessenger\\RESTServer\\RESTServer.csproj",
         "projectName": "RESTServer",
-        "projectPath": "D:\\CsharpSolutions\\SKHOS Oppgave3\\EventMessenger\\RESTServer\\RESTServer.csproj",
-        "packagesPath": "C:\\Users\\Hardy\\.nuget\\packages\\",
-        "outputPath": "D:\\CsharpSolutions\\SKHOS Oppgave3\\EventMessenger\\RESTServer\\obj\\",
+        "projectPath": "G:\\Users\\Eli\\VisualStudio\\DTE-2803\\EventMessenger\\RESTServer\\RESTServer.csproj",
+        "packagesPath": "C:\\Users\\dee00\\.nuget\\packages\\",
+        "outputPath": "G:\\Users\\Eli\\VisualStudio\\DTE-2803\\EventMessenger\\RESTServer\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
         ],
         "configFilePaths": [
-          "C:\\Users\\Hardy\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\dee00\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -29,6 +29,7 @@
         },
         "frameworks": {
           "netcoreapp3.1": {
+            "targetAlias": "netcoreapp3.1",
             "projectReferences": {}
           }
         },
@@ -40,6 +41,7 @@
       },
       "frameworks": {
         "netcoreapp3.1": {
+          "targetAlias": "netcoreapp3.1",
           "dependencies": {
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
@@ -86,7 +88,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\3.1.401\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     }

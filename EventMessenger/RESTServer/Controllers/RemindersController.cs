@@ -26,15 +26,18 @@ namespace RESTServer.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ReminderDTO>>> GetReminders()
         {
+            //fetch all reminders
             var list = await _context.Reminders.Where(x => !x.IsDeleted).Include(x => x.CreatedBy).ToListAsync();
             var dtoList = new List<ReminderDTO>();
 
+            //select only the needed fields for transfer as described in dto
             foreach (var reminder in list)
             {
                 var dto = ReminderDTO.Selector().Compile()(reminder);
                 dtoList.Add(dto);
             }
 
+            //return dto list
             return dtoList;
         }
 
@@ -42,6 +45,7 @@ namespace RESTServer.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<ReminderDTO>> GetReminder(int id)
         {
+            //fetch the reminder
             var reminder = await _context.Reminders.FindAsync(id);
 
             if (reminder == null)
@@ -49,12 +53,15 @@ namespace RESTServer.Controllers
                 return NotFound();
             }
 
+            //select only the needed fields for transfer as described in dto
             var dto = ReminderDTO.Selector().Compile()(reminder);
 
+            //fetch user details
             var user = await _context.Users.FindAsync(reminder.CreatedById);
 
             dto.SendtFrom = user.FirstName + " " + user.SirName;
 
+            //return dto
             return dto;
         }
 
@@ -64,10 +71,12 @@ namespace RESTServer.Controllers
         [HttpPut("{id}")]
         public async Task<IActionResult> PutReminder(int id, [FromBody]ReminderDTO reminder)
         {
+            //check for a bad request
             if (id != reminder.Id)
             {
                 return BadRequest();
             }
+            //check if the reminder exists
             if (!ReminderExists(id))
             {
                 return NotFound();
@@ -75,6 +84,7 @@ namespace RESTServer.Controllers
 
             var dbObject = _context.Reminders.First(x => x.Id == id);
 
+            //change the dto fields
             dbObject.EventId = reminder.EventId;
             dbObject.Date = reminder.EventDate;
             dbObject.Message = reminder.Message;
@@ -84,6 +94,7 @@ namespace RESTServer.Controllers
 
             try
             {
+                //try to save the changes
                 await _context.SaveChangesAsync();
                 return Ok();
             }
@@ -100,6 +111,8 @@ namespace RESTServer.Controllers
         public async Task<ActionResult<ReminderDTO>> PostReminder([FromBody]ReminderDTO dto)
         {
             //Exchange CreatedByID for current user
+
+            //create new reminder object
             var reminder = new Reminder()
             {
                 Created = DateTime.Now,
@@ -109,9 +122,11 @@ namespace RESTServer.Controllers
                 Message = dto.Message
             };
 
+            //save reminder to the db
             _context.Reminders.Add(reminder);
             await _context.SaveChangesAsync();
 
+            //return the new object with the new id
             return CreatedAtAction("GetReminder", new { id = reminder.Id }, ReminderDTO.Selector().Compile()(reminder));
         }
 
@@ -120,12 +135,15 @@ namespace RESTServer.Controllers
         public async Task<ActionResult<bool>> DeleteReminder(int id)
         {
             //Only run if user is authenticated
+            
+            //fetch reminder 
             var reminder = await _context.Reminders.FindAsync(id);
             if (reminder == null)
             {
                 return NotFound();
             }
 
+            //soft delete reminder
             reminder.IsDeleted = true;
             await _context.SaveChangesAsync();
 

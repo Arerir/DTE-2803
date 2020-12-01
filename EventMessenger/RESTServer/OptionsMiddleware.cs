@@ -9,6 +9,7 @@ namespace RESTServer
 {
     public class OptionsMiddleware
     {
+        //Adding OPTIONS response to the server
         private readonly RequestDelegate _next;
 
         public OptionsMiddleware(RequestDelegate next)

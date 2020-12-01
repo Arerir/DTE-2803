@@ -30,21 +30,26 @@ namespace RESTServer.Controllers
 
             //limit list by user.HasAdmin ? All : .Where(x => x.CreatedBy == user.Id)
 
+            //fetch all events
             var list = await _context.Events.Where(x => !x.IsDeleted && !x.Archived).ToListAsync();
 
             var dtoList = new List<BadEventDTO>();
 
+            //select only the needed fields for transfer as described in dto
             foreach (var item in list)
             {
                 dtoList.Add(BadEventDTO.Selector().Compile()(item));
             }
 
+            //return dto list
             return dtoList;
         }
         // GET: api/BadEvents/archive
         [HttpGet("archive")]
         public async Task<ActionResult<IEnumerable<BadEventDTO>>> GetArchive()
         {
+            //same as above only filtered by the archived
+
             // if user is authenticated
 
             //limit list by user.HasAdmin ? All : .Where(x => x.CreatedBy == user.Id)
@@ -67,6 +72,7 @@ namespace RESTServer.Controllers
         {
             // check user Access
 
+            //fetch event
             var badEvent = await _context.Events.FindAsync(id);
 
             if (badEvent == null && !badEvent.IsDeleted)
@@ -74,6 +80,7 @@ namespace RESTServer.Controllers
                 return NotFound();
             }
 
+            //select only the needed fields for transfer as described in dto
             return BadEventDTO.Selector().Compile()(badEvent);
         }
 
@@ -84,17 +91,19 @@ namespace RESTServer.Controllers
         public async Task<IActionResult> PutBadEvent(int id, BadEventDTO dto)
         {
             // check user Access
+            //check for a bad request
             if (id != dto.Id)
             {
                 return BadRequest();
             }
+            //check if the event exists
             if (!BadEventExists(id))
             {
                 return NotFound();
             }
 
             var badEvent = _context.Events.First(x => x.Id == id && !x.IsDeleted && !x.Archived);
-
+            //change the dto fields
             badEvent.Date = dto.Date;
             badEvent.Message = dto.Message;
             badEvent.Placement = dto.Placement;
@@ -108,6 +117,7 @@ namespace RESTServer.Controllers
 
             try
             {
+                //try to save the changes
                 await _context.SaveChangesAsync();
                 return Ok();
             }
@@ -121,10 +131,13 @@ namespace RESTServer.Controllers
         public async Task<IActionResult> PutArchive(int id, BadEventDTO dto)
         {
             // check user Access
+
+            //check for a bad request
             if (id != dto.Id)
             {
                 return BadRequest();
             }
+            //check if the event exists
             if (!BadEventExists(id))
             {
                 return NotFound();
@@ -132,11 +145,12 @@ namespace RESTServer.Controllers
 
             var badEvent = _context.Events.First(x => x.Id == id);
 
-
+            //set the event as archived
             badEvent.Archived = true;
 
             try
             {
+                //try to save the changes
                 await _context.SaveChangesAsync();
                 return Ok();
             }
@@ -153,6 +167,8 @@ namespace RESTServer.Controllers
         public async Task<ActionResult<BadEventDTO>> PostBadEvent(BadEventDTO dto)
         {
             //Exchange CreatedByID for current user
+
+            //create new event object
             var badEvent = new BadEvent()
             {
                 Created = DateTime.Now,
@@ -166,9 +182,11 @@ namespace RESTServer.Controllers
                 StatusId = 1
             };
 
+            //save the event to the db
             _context.Events.Add(badEvent);
             await _context.SaveChangesAsync();
 
+            //return the new object with the new id
             return CreatedAtAction("GetBadEvent", new { id = badEvent.Id }, BadEventDTO.Selector().Compile()(badEvent));
         }
 
@@ -176,12 +194,16 @@ namespace RESTServer.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<bool>> DeleteBadEvent(int id)
         {
+            // if user is Authenticated
+
+            //fetch event
             var badEvent = await _context.Events.FindAsync(id);
             if (badEvent == null)
             {
                 return NotFound();
             }
 
+            //soft delete event
             badEvent.IsDeleted = true;
             await _context.SaveChangesAsync();
 

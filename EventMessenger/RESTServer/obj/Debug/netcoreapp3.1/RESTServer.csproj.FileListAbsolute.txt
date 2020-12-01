@@ -1,6 +1,5 @@
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\appsettings.Development.json
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\appsettings.json
-G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\Properties\launchSettings.json
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\RESTServer.exe
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.AssemblyInfoInputs.cache
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.AssemblyInfo.cs
@@ -158,3 +157,4 @@ G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreap
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\bin\Debug\netcoreapp3.1\runtimes\win\lib\netcoreapp2.0\System.Management.dll
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.csproj.CoreCompileInputs.cache
 G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\RESTServer.MvcApplicationPartsAssemblyInfo.cache
+G:\Users\Eli\VisualStudio\DTE-2803\EventMessenger\RESTServer\obj\Debug\netcoreapp3.1\scopedcss\bundle\RESTServer.styles.css

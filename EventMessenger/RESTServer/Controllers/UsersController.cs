@@ -82,7 +82,7 @@ namespace RESTServer.Controllers
             dbObject.FirstName = user.FirstName;
             dbObject.SirName = user.SirName;
             dbObject.Password = !string.IsNullOrEmpty(user.Password) ? GetHashedValue(user.Password) : dbObject.Password;
-            dbObject.BirthId = !string.IsNullOrEmpty(user.Password) ? GetHashedValue(user.BirthId): dbObject.BirthId;
+            dbObject.BirthId = !string.IsNullOrEmpty(user.BirthId) ? GetHashedValue(user.BirthId): dbObject.BirthId;
             dbObject.Email = user.Email;
             dbObject.HasAdmin = user.HasAdmin;
 
@@ -130,6 +130,8 @@ namespace RESTServer.Controllers
 
         private string GetHashedValue (string input)
         {
+            if (string.IsNullOrWhiteSpace(input)) return input;
+
             var builder = new StringBuilder(128);
             using(SHA512 shaM = new SHA512Managed())
             {

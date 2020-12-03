@@ -94,6 +94,8 @@ namespace RESTServer.Data.DAO
 
         public void AuthenticateUser(int amountOfLogins, int userId)
         {
+            //here we can add code to create a token and store it in the database to check against if the user is authenticated,
+            //token can also contain data to adress if the user is admin or not. 
             Session localSession = GetSession();
             var statement = new SimpleStatement("UPDATE user SET amountoflogins =? WHERE id =?", amountOfLogins + 1, userId);
             localSession.Execute(statement);

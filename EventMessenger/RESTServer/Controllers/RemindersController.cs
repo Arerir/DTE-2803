@@ -28,8 +28,10 @@ namespace RESTServer.Controllers
         public ActionResult<IEnumerable<ReminderDTO>> GetReminders()
         {
             //authenticate user
+            //set up DAO and fetch all reminders before converting to DTO
             var dao = new ReminderDAO();
             var list = dao.GetReminders() //limit here with .WhereIf(!user.HasAdmin, x => x.UserId == user.Id)
+                        .Where(x => !x.IsDeleted)
                         .Select(ReminderDTO.Selector().Compile()).ToList();
 
             //use to populate BadEvents from earlier solution
@@ -45,15 +47,18 @@ namespace RESTServer.Controllers
         public ActionResult<ReminderDTO> GetReminder(int id)
         {
             //authenticate user
+            //set up DAO and fetch reminder
             var dao = new ReminderDAO();
             var reminder = dao.GetReminder(id);
 
-            if (reminder == null)
+            //check existance of reminder
+            if (reminder == null || reminder.IsDeleted)
                 return NotFound();
 
             //select only the needed fields for transfer as described in dto
             var dto = ReminderDTO.Selector().Compile()(reminder);
 
+            //fetch userdata for the user that created the reminder
             var userdao = new UserDAO();
             var user = userdao.GetUser(reminder.CreatedById);
             dto.SendtFrom = user.FirstName + " " + user.SirName;
@@ -72,12 +77,16 @@ namespace RESTServer.Controllers
             if (id != reminder.Id)
                 return BadRequest();
             //authenticate user
+
+            //set up DAO and fetch reminder
             var dao = new ReminderDAO();
             var dbObject = dao.GetReminder(id);
 
-            if (dbObject == null)
+            //check existance of reminder
+            if (dbObject == null || dbObject.IsDeleted)
                 return NotFound();
 
+            //update reminder with DTO fields
             dbObject.EventId = reminder.EventId;
             dbObject.Date = reminder.EventDate;
             dbObject.Message = reminder.Message;
@@ -86,11 +95,13 @@ namespace RESTServer.Controllers
 
             try
             {
+                //try to save the reminder
                 dao.UpdateReminder(dbObject);
                 return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
+                //return errorcode if saving fails
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -103,6 +114,7 @@ namespace RESTServer.Controllers
         {
             //authenticate user
             //Exchange CreatedByID for current user
+            //set up DAO and create new reminder
             var dao = new ReminderDAO();
             var reminder = new Reminder()
             {
@@ -113,8 +125,10 @@ namespace RESTServer.Controllers
                 Message = dto.Message
             };
 
+            //save the reminder to the database
             var id = dao.CreateReminder(reminder);
 
+            //return a created response with the new reminder
             return CreatedAtAction("GetReminder", new { id }, ReminderDTO.Selector().Compile()(dao.GetReminder(id)));
         }
 
@@ -122,11 +136,12 @@ namespace RESTServer.Controllers
         [HttpDelete("{id}")]
         public ActionResult<bool> DeleteReminder(int id)
         {
-            //authenticate user
+            //authenticate user (CreatedById  = currentuser.Id || admin)
+            //set up DAO and fetch reminder
             var dao = new ReminderDAO();
             var reminder = dao.GetReminder(id);
-            
-            if (reminder == null)
+            //check existance of the rminder
+            if (reminder == null || reminder.IsDeleted)
                 return NotFound();
 
             //soft delete reminder

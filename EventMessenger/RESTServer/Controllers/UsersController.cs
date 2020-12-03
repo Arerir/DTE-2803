@@ -33,6 +33,7 @@ namespace RESTServer.Controllers
         public ActionResult<IEnumerable<UserDTO>> GetUsers()
         {
             // if user is authenticated as admin
+            //set up DAO and fetch all the users before converting to DTO
             var dao = new UserDAO();
             var list = dao.GetUsers().Select(UserDTO.Selector().Compile()).ToList();
 
@@ -51,10 +52,11 @@ namespace RESTServer.Controllers
         public ActionResult<UserDTO> GetUser(int id)
         {
             // if user is authenticated and id = currentuser id
+            //set up DAO
             var dao = new UserDAO();
-
+            //fetch user
             var user = dao.GetUser(id);
-
+            //check existance of user
             if (user == null || user.IsDeleted)
                 return NotFound();
 
@@ -69,17 +71,17 @@ namespace RESTServer.Controllers
         public IActionResult PutUser(int id, [FromBody]UserDTO user)
         {
             //if current user is Admin
-
+            //set up DAO
             var dao = new UserDAO();
-
+            //check for bad request
             if (id != user.Id)
                 return BadRequest();
-
+            //fetch user
             var dbObject = dao.GetUser(id);
-
-            if(dbObject == null)
+            //check existance of user
+            if(dbObject == null && !dbObject.IsDeleted)
                 return NotFound();
-
+            //update userfields
             dbObject.FirstName = user.FirstName;
             dbObject.SirName = user.SirName;
             dbObject.Password = !string.IsNullOrEmpty(user.Password) ? GetHashedValue(user.Password) : dbObject.Password;
@@ -89,11 +91,13 @@ namespace RESTServer.Controllers
 
             try
             {
+                //try to save the user
                 dao.UpdateUser(dbObject);
                 return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
+                //return errorcode if saving fails
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -105,9 +109,9 @@ namespace RESTServer.Controllers
         public ActionResult<UserDTO> PostUser(UserDTO user)
         {
             //if user logged in is authenticated
-
+            //set up DAO
             var dao = new UserDAO();
-
+            //check existance of user
             if (dao.UserExists(GetHashedValue(user.BirthId)))
                 return BadRequest();
 
@@ -125,11 +129,13 @@ namespace RESTServer.Controllers
                 Password = GetHashedValue(user.Password),
                 SirName = user.SirName
             };
+            //save user
             var id = dao.CreateUser(dbObject);
-
+            //retuen createdresponse with the new user
             return CreatedAtAction("GetUser", new { id }, UserDTO.Selector().Compile()(dao.GetUser(id)));
         }
 
+        //private method to convert a string into a hashed value with SHA-512
         private string GetHashedValue (string input)
         {
             if (string.IsNullOrWhiteSpace(input)) return input;
@@ -149,14 +155,17 @@ namespace RESTServer.Controllers
         [HttpPost("authenticate")]
         public ActionResult PostAuthenticate ([FromBody] LoginDTO credentials)
         {
+            //set up DAO
             var dao = new UserDAO();
+            //hash the provided values
             var userName = GetHashedValue(credentials.UserId);
             var pass = GetHashedValue(credentials.Password);
-
+            //fetch all users
             var users = dao.GetUsers();
-
+            //check credentials
             var user = users.FirstOrDefault(x => x.BirthId == userName && x.Password == pass && !x.IsDeleted);
-
+            
+            //Add code in this method to create and save a token to return to client
             if (user != null)
                 dao.AuthenticateUser(user.AmountOfLogins, user.Id);
 
@@ -169,9 +178,9 @@ namespace RESTServer.Controllers
         {
             // if user is Authenticated and id != currentUser.Id
             var dao = new UserDAO();
-
+            //fetch user and check existance of user
             var user = dao.GetUser(id);
-            if (user == null)
+            if (user == null || user.IsDeleted)
                 return NotFound();
 
             //soft delete user

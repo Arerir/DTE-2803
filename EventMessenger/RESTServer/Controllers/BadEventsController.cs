@@ -33,8 +33,11 @@ namespace RESTServer.Controllers
             // if user is authenticated
             //limit list by .WhereIf(!user.HasAdmin, x => x.UserId == user.Id)
 
+            //set up DAO
             var dao = new BadEventDAO();
+            //fetch all non archived events and convert to DTO
             var list = dao.GetBadEvents(false)// limit here
+                .Where(x => !x.IsDeleted)
                 .Select(BadEventDTO.Selector().Compile()).ToList();
 
             //use to populate BadEvents from earlier solution
@@ -54,7 +57,9 @@ namespace RESTServer.Controllers
             //limit list by .WhereIf(!user.HasAdmin, x => x.UserId == user.Id)
 
             var dao = new BadEventDAO();
-            var list = dao.GetBadEvents(true).Select(BadEventDTO.Selector().Compile()).ToList();// limit here
+            var list = dao.GetBadEvents(true)
+                            .Where(x => !x.IsDeleted)
+                            .Select(BadEventDTO.Selector().Compile()).ToList();// limit here
 
             return list;
         }
@@ -86,12 +91,15 @@ namespace RESTServer.Controllers
             if (id != dto.Id)
                 return BadRequest();
 
+            //set up DAO and fetch event
             var dao = new BadEventDAO();
             var badEvent = dao.GetBadEvent(id);
 
-            if (badEvent == null)
+            //check if it exists
+            if (badEvent == null || badEvent.IsDeleted)
                 return NotFound();
 
+            //change the dto fields
             badEvent.Date = dto.Date;
             badEvent.Message = dto.Message;
             badEvent.Placement = dto.Placement;
@@ -103,11 +111,13 @@ namespace RESTServer.Controllers
 
             try
             {
+                //try to save the changes
                 dao.UpdateBadEvent(badEvent);
                 return Ok();
             }
             catch (DbUpdateConcurrencyException)
             {
+                //return error if the saving doesn't go well
                 return StatusCode(StatusCodes.Status500InternalServerError);
             }
         }
@@ -121,14 +131,17 @@ namespace RESTServer.Controllers
             if (id != dto.Id)
                 return BadRequest();
 
+            //set up DAO and fetch event
             var dao = new BadEventDAO();
             var badEvent = dao.GetBadEvent(id);
 
-            if (badEvent == null)
+            //check if it exists
+            if (badEvent == null || badEvent.IsDeleted)
                 return NotFound();
 
             try
             {
+                //try to set object archived
                 dao.ArchiveBadEvent(id);
                 return Ok();
             }
@@ -160,9 +173,10 @@ namespace RESTServer.Controllers
                 StatusId = 1
             };
 
+            //set up DAO and save the new event in the database
             var dao = new BadEventDAO();
             var id = dao.CreateBadEvent(badEvent);
-
+            //return a CreatedResponse and the newly created object
             return CreatedAtAction("GetBadEvent", new { id }, BadEventDTO.Selector().Compile()(dao.GetBadEvent(id)));
         }
 
@@ -171,9 +185,10 @@ namespace RESTServer.Controllers
         public ActionResult<bool> DeleteBadEvent(int id)
         {
             //if user is authenticated
+            //set up DAO and fetch event before checking if it exists
             var dao = new BadEventDAO();
             var badEvent = dao.GetBadEvent(id);
-            if (badEvent == null)
+            if (badEvent == null || badEvent.IsDeleted)
                 return NotFound();
 
             //soft delete event

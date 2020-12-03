@@ -12,8 +12,9 @@ namespace RESTServer.Data.DAO
         private Cluster cluster;
         private Session session;
         private String NODE = Startup.Configuration.GetConnectionString("CassandraConnection");
-        private String USER = Startup.Configuration.GetConnectionString("CassandraUser");
-        private String PASS = Startup.Configuration.GetConnectionString("CassandraPwd");
+        //Use these if the database has integrated security added strings the same way as the connectionpoint
+        //private String USER = Startup.Configuration.GetConnectionString("CassandraUser");
+        //private String PASS = Startup.Configuration.GetConnectionString("CassandraPwd");
 
         public CassandraDAO()
         {
@@ -22,6 +23,7 @@ namespace RESTServer.Data.DAO
 
         private void connect()
         {
+            //connect to Cassandra cluster
             cluster = Cluster.Builder().AddContactPoint(NODE).Build();
             var i = cluster.Configuration.SocketOptions.SetConnectTimeoutMillis(50000);
             session = (Session)cluster.Connect("restserver");
@@ -29,6 +31,7 @@ namespace RESTServer.Data.DAO
 
         protected Session GetSession()
         {
+            //return the session if it's already built
             if(session == null)
             {
                 connect();
